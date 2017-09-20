@@ -1,0 +1,28 @@
+osx_image: xcode8.3
+language: objective-c
+
+before_install:
+  # Fix Travis  xcodebuild exited with 65 https://github.com/travis-ci/travis-ci/issues/6675#issuecomment-257964767
+  - export IOS_SIMULATOR_UDID=`instruments -s devices | grep -m 1 "iPhone 7 (10.3" | awk -F '[ ]' '{print $4}' | awk -F '[\[]' '{print $2}' | sed 's/.$//'`
+  - echo $IOS_SIMULATOR_UDID
+  - open -a "simulator" --args -CurrentDeviceUDID $IOS_SIMULATOR_UDID
+
+install:
+  - carthage checkout
+  - cd Xcode
+  - bundle install
+  - bundle exec pod repo update --silent
+  - bundle exec pod install --project-directory=Testing-iOS/
+  - bundle exec pod install --project-directory=Testing-macOS/
+  - cd ../
+
+before_script:
+  - set -o pipefail
+
+script:
+  - xcodebuild -workspace Xcode/Testing-macOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk macosx -destination 'platform=OS X,arch=x86_64' test | xcpretty -c
+  - travis_retry xcodebuild -workspace Xcode/Testing-iOS/XMPPFrameworkTests.xcworkspace -scheme XMPPFrameworkTests -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" test | xcpretty -c
+
+  - xcodebuild -project XMPPFramework.xcodeproj -scheme "XMPPFramework (tvOS)" -sdk appletvsimulator -arch x86_64 build | xcpretty -c
+  - xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (macOS)" -sdk macosx -arch x86_64 test | xcpretty -c
+  - travis_retry xcodebuild -project Xcode/Testing-Carthage/XMPPFrameworkTests.xcodeproj -scheme "XMPPFrameworkTests (iOS)" -sdk iphonesimulator -destination "id=$IOS_SIMULATOR_UDID" test | xcpretty -c

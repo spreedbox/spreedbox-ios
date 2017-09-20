@@ -1,0 +1,25 @@
+# file
+
+#########################################################################
+#                                                                       #
+#       Title         - .gitignore file                                 #
+#       For           - iOS - Xcode8                                    #
+#                                                                       #
+#########################################################################
+
+## Nextcloud
+.DS_Store
+*.xcodeproj
+!Nextcloud.xcodeproj
+README.md
+Documentation/
+Custom/
+GoogleService-Info.plist
+DevicePushKey-Info.plist
+iOSClient/Brand/Device*
+
+## Xcode private settings
+DerivedData/
+build/
+xcuserdata/
+UserInterfaceState.xcuserstate

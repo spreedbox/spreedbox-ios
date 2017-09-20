@@ -1,0 +1,6 @@
+framework module gtm_oauth2 {
+  umbrella header "gtm-oauth2-umbrella.h"
+
+  export *
+  module * { export * }
+}

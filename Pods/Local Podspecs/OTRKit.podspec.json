@@ -1,0 +1,55 @@
+{
+  "name": "OTRKit",
+  "version": "2.0.0",
+  "summary": "OTRKit is a lightweight Objective-C wrapper for libotr to provide OTR (Off the Record) message encryption.",
+  "authors": "Chris Ballinger <chris@chatsecure.org>",
+  "homepage": "https://chatsecure.org",
+  "license": {
+    "type": "LGPL",
+    "file": "LICENSE"
+  },
+  "source": {
+    "git": "https://github.com/ChatSecure/OTRKit.git",
+    "tag": "2.0.0"
+  },
+  "prepare_command": "bash ./scripts/build-all.sh\nexport PLATFORM_TARGET=\"macOS\"\nbash ./scripts/build-all.sh",
+  "platforms": {
+    "ios": "8.0",
+    "osx": "10.10"
+  },
+  "ios": {
+    "source_files": [
+      "OTRKit/**/*.{h,m}",
+      "OTRKitDependencies-iOS/include/**/*.h"
+    ],
+    "vendored_libraries": "OTRKitDependencies-iOS/lib/*.a",
+    "xcconfig": {
+      "HEADER_SEARCH_PATHS": "$(PODS_ROOT)/OTRKit/OTRKitDependencies-iOS/include"
+    }
+  },
+  "osx": {
+    "frameworks": [
+      "Security",
+      "CoreServices"
+    ],
+    "source_files": [
+      "OTRKit/**/*.{h,m}",
+      "OTRKitDependencies-macOS/include/**/*.h"
+    ],
+    "vendored_libraries": "OTRKitDependencies-macOS/lib/*.a",
+    "xcconfig": {
+      "HEADER_SEARCH_PATHS": "$(PODS_ROOT)/OTRKit/OTRKitDependencies-macOS/include"
+    }
+  },
+  "public_header_files": "OTRKit/**/*.h",
+  "preserve_paths": [
+    "COPYING.LGPLv2.1",
+    "COPYING.MPLv2"
+  ],
+  "libraries": [
+    "gpg-error",
+    "gcrypt",
+    "otr"
+  ],
+  "requires_arc": true
+}

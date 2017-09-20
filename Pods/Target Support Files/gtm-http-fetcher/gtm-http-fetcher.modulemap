@@ -1,0 +1,6 @@
+framework module gtm_http_fetcher {
+  umbrella header "gtm-http-fetcher-umbrella.h"
+
+  export *
+  module * { export * }
+}

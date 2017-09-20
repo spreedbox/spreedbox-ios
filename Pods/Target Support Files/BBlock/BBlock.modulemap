@@ -1,0 +1,6 @@
+framework module BBlock {
+  umbrella header "BBlock-umbrella.h"
+
+  export *
+  module * { export * }
+}

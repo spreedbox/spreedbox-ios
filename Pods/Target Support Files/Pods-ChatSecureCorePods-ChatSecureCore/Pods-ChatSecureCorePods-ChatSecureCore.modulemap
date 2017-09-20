@@ -1,0 +1,6 @@
+framework module Pods_ChatSecureCorePods_ChatSecureCore {
+  umbrella header "Pods-ChatSecureCorePods-ChatSecureCore-umbrella.h"
+
+  export *
+  module * { export * }
+}

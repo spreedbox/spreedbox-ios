@@ -1,0 +1,6 @@
+framework module libsqlfs {
+  umbrella header "libsqlfs-umbrella.h"
+
+  export *
+  module * { export * }
+}

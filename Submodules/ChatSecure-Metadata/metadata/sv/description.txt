@@ -1,0 +1,28 @@
+ChatSecure är en gratis meddelandeapp med öppen källkod som använder OTR-kryptering över XMPP. Du kan ansluta till ett existerande Google-konto, skapa nya konton på publika XMPP-servrar (inklusive via Tor), eller till och med ansluta till din egen server för extra säkerhet.
+
+Till skillnad från andra appar som stänger in dig i deras bubbla är ChatSecure fullt kompatibel med andra klienter som stöder OTR och XMPP, som till exempel Adium, Jitsi, med flera.
+
+ChatSecure använder bara välkända kryptografiska bibliotek med öppen källkod för att hålla dina konversationer privata. Andra appar kan göra påståenden om "militär nivå" på säkerheten, men utan källkod som kan granskas av allmänheten och end-to-end kryptering som kan verifieras, kan du inte vara riktigt säker.
+
+* XMPP med TLS-certifikat pinning.
+* OTR för end-to-end kryptering som kan verifieras och framåtsekretess.
+* OMEMO for a mobile-friendly alternative to OTR.
+* Tor integration for easy access to XMPP .onion services.
+* SQLCipher för att kryptera konversationsloggar lokalt.
+Gratis och öppen källkod: https://github.com/chatsecure/chatsecure-ios
+
+Följ @ChatSecure på Twitter: https://twitter.com/chatsecure
+
+►► ChatSecure Donations
+Subscribe to ChatSecure to help make developing free and open source privacy tools sustainable. We welcome any contribution to support ongoing development. The donation levels are currently $2.99/month, $5.99/month or $19.99/month. Here's what you get:
+
+• Feel good supporting indie software
+• Continued development and updates
+• Help keep the app free for everyone
+
+To manage your subscription:
+• You can turn off auto-renewal via the main Settings app: http://support.apple.com/kb/ht4098
+• Subscription automatically renews unless auto-renew is turned off at least 24-hours before the end of the current period. Your iTunes account will be charged for renewal within 24-hours prior to the end of the current period, and identify the cost of the renewal.
+• Payment will be charged to iTunes Account at confirmation of purchase.
+• Visit the following URL to view our Privacy Policy: https://chatsecure.org/privacy/
+• Visit the following URL for full terms of use: https://chatsecure.org/terms/

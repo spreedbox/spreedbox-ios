@@ -1,0 +1,21 @@
+/*
+ Intro.strings
+ Crypto Cloud - Nextcloud
+
+ Created by Marino Faggiana on 30/10/15.
+ Copyright © 2017 TWS. All rights reserved.
+ */
+
+// Intro
+
+"_intro_1_title_"   = "A safe home for all your data";
+"_intro_1_text_"    = "Access, share and protect your files at home and at work";
+
+"_intro_11_title_"  = "Use gestures in files view";
+"_intro_11_text_"   = "Swipe → or ←: Options \n\nLong touch: Copy/Paste or Open in… \n\nPress: 3D Touch (when available)";
+
+"_intro_2_title_"   = "Multi account";
+"_intro_2_text_"    = "Connect to all your clouds and touch the Nextcloud logo on the Files tab to switch between them";
+
+"_intro_3_title_"   = "Start";
+"_intro_3_text_"    = "Good, your Nextcloud is ready for use. Further information, news and contact-information to be found on https://nextcloud.com";

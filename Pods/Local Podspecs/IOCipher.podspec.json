@@ -1,0 +1,58 @@
+{
+  "name": "IOCipher",
+  "version": "0.1.0",
+  "summary": "Objective-C wrapper for libsqlfs and SQLCipher to create virtual encrypted file systems.",
+  "homepage": "https://github.com/chrisballinger/IOCipher",
+  "license": "LGPLv2.1+",
+  "authors": {
+    "Chris Ballinger": "chris@chatsecure.org"
+  },
+  "source": {
+    "git": "https://github.com/chrisballinger/IOCipher.git",
+    "tag": "0.1.0"
+  },
+  "social_media_url": "https://twitter.com/ChatSecure",
+  "platforms": {
+    "ios": "7.0",
+    "osx": "10.8"
+  },
+  "requires_arc": true,
+  "default_subspecs": "standard",
+  "subspecs": [
+    {
+      "name": "common",
+      "source_files": "IOCipher/*.{h,m}",
+      "xcconfig": {
+        "OTHER_CFLAGS": "$(inherited) -DHAVE_LIBSQLCIPHER -DSQLITE_HAS_CODEC"
+      },
+      "dependencies": {
+        "libsqlfs/SQLCipher": [
+
+        ],
+        "CocoaLumberjack": [
+
+        ]
+      }
+    },
+    {
+      "name": "standard",
+      "dependencies": {
+        "IOCipher/common": [
+
+        ]
+      }
+    },
+    {
+      "name": "GCDWebServer",
+      "source_files": "IOCipher/GCDWebServer/*.{h,m}",
+      "dependencies": {
+        "IOCipher/common": [
+
+        ],
+        "GCDWebServer": [
+
+        ]
+      }
+    }
+  ]
+}
