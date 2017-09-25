@@ -50,7 +50,7 @@ open class OTRSplitViewCoordinator: NSObject, OTRConversationViewControllerDeleg
     
     open func enterConversationWithThread(_ threadOwner:OTRThreadOwner, sender:AnyObject?) {
         
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "enterConversationWithBuddies"), object: self)
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "enterConversationWithBuddies"), object: self, userInfo:["threadOwner": threadOwner, "sender": sender])
         
         /*guard let splitVC = self.splitViewController else {
             return
@@ -93,7 +93,7 @@ open class OTRSplitViewCoordinator: NSObject, OTRConversationViewControllerDeleg
     
     public func conversationViewController(_ conversationViewController: OTRConversationViewController!, didSelectCompose sender: Any!) {
         
-        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "conversationViewController"), object: self)
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "conversationViewController"), object: self, userInfo:["viewcontroller": self])
         
         /*guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
             return
@@ -109,6 +109,13 @@ open class OTRSplitViewCoordinator: NSObject, OTRConversationViewControllerDeleg
         self.splitViewController?.present(modalNavigationController, animated: true, completion: nil)*/
     }
     
+    public func conversationViewController(_ conversationViewController: OTRConversationViewController!, didSelectBack sender: Any!) {
+        
+        NotificationCenter.default.post(name: NSNotification.Name(rawValue: "back"), object: self, userInfo:["viewcontroller": self])
+   
+    }
+    
+
     //MARK: OTRComposeViewControllerDelegate Methods
     open func controller(_ viewController: OTRComposeViewController, didSelectBuddies buddies: [String]?, accountId: String?, name: String?) {
 

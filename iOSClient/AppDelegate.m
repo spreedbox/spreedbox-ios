@@ -63,6 +63,7 @@
 #import "OTRAccount.h"
 #import "OTRXMPPAccount.h"
 #import "OTRBuddy.h"
+#import "../ChatSecure/Classes/Model/Yap Storage/OTRThreadOwner.h"
 @import YapDatabase;
 
 
@@ -418,6 +419,7 @@
             }];
         }
     }
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = rootViewController;
     
@@ -432,32 +434,77 @@
     [self.window makeKeyAndVisible];
     
     
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"conversationViewController" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(containeFrameRecieved:)
+                                             selector:@selector(conversationViewControllerRecieved:)
                                                  name:@"conversationViewController"
+                                               object:nil];
+    
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"enterConversationWithBuddies" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(enterConversationWithBuddiesReceived:)
+                                                 name:@"enterConversationWithBuddies"
+                                               object:nil];
+    
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:@"back" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(backToRoot:)
+                                                 name:@"back"
                                                object:nil];
 }
 
-- (void)containeFrameRecieved:(NSNotification *)note {
-    NSDictionary *theData = [note object];
+- (void)conversationViewControllerRecieved:(NSNotification *)note {
     
     OTRComposeViewController *composeViewController = [self.theme composeViewController];
-    composeViewController.delegate = [note object];
+    composeViewController.delegate = _splitViewCoordinator;
     
     UINavigationController* modalNavigationController = [[UINavigationController alloc] initWithRootViewController:composeViewController];
     modalNavigationController.modalPresentationStyle = UIModalPresentationFormSheet;
     
     //May need to use conversationViewController
     [self.window.rootViewController presentViewController:(UIViewController *)modalNavigationController animated: true completion: nil];
-    
-    if (theData != nil) {
-        
-        CGFloat containerFrameWidth = [[theData objectForKey:@"vwConatinerFrameWidth"] floatValue];
-        CGFloat containerFrameHeight = [[theData objectForKey:@"vwConatinerFrameHeight"] floatValue];
-        
-        NSLog(@"Width:%f and Height: %f",containerFrameWidth,containerFrameHeight);
-    }
+   
 }
+
+- (void)enterConversationWithBuddiesReceived:(NSNotification *)note {
+    NSDictionary *dict = [note userInfo];
+    id<OTRThreadOwner> threadOwner = (id<OTRThreadOwner>) dict[@"threadOwner"];
+    id sender = (id) dict[@"sender"];
+    
+     // 1. If it is a hold-to-talk now but should be a group thread the create group thread. Else if is group
+     if ([_messagesViewController isKindOfClass:[OTRMessagesHoldTalkViewController class]] && threadOwner.isGroupThread) {
+         _messagesViewController = self.theme.groupMessagesViewController;
+     } else if ([_messagesViewController isKindOfClass:[OTRMessagesGroupViewController class]] && !threadOwner.isGroupThread) {
+         _messagesViewController = self.theme.messagesViewController;
+     }
+     
+    
+    OTREncryptionManager* encryptionManager = [[OTRProtocolManager sharedInstance] encryptionManager];
+    [encryptionManager maybeRefreshOTRSessionForBuddyKey: threadOwner.threadIdentifier collection: threadOwner.threadCollection];
+     
+     //Set nav controller root view controller to mVC and then show detail with nav controller
+     
+    [_messagesViewController setThreadKey:threadOwner.threadIdentifier collection: threadOwner.threadCollection];
+    
+    UISplitViewController* splitViewController = (UISplitViewController*) self.window.rootViewController;
+     //iPad check where there are two navigation controllers and we want the second one
+    if (splitViewController.viewControllers.count > 1 && [splitViewController.viewControllers[1] isKindOfClass:[UINavigationController class]] && [splitViewController.viewControllers objectAtIndex: 1] ==_messagesViewController) {
+    } else if (splitViewController.viewControllers.count == 1 && [splitViewController.viewControllers objectAtIndex: 0] == _messagesViewController) {
+     } else {
+        [splitViewController showDetailViewController:_messagesViewController sender: sender];
+
+     }
+    
+}
+
+
+- (void)backToRoot:(NSNotification *)note {
+    
+    self.window.hidden = YES;
+}
+
 
 //
 // L' applicazione si dimetterà dallo stato di attivo

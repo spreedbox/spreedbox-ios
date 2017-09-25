@@ -72,7 +72,15 @@ static CGFloat kOTRConversationCellHeight = 80.0;
     self.navigationItem.rightBarButtonItem = settingsBarButtonItem;
     
     self.composeBarButtonItem =[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemCompose target:self action:@selector(composeButtonPressed:)];
-    self.navigationItem.leftBarButtonItems = @[self.composeBarButtonItem];
+    
+    // PE:
+    UIBarButtonItem *backButton = [[UIBarButtonItem alloc]
+                                   initWithTitle:@"Back"
+                                   style:UIBarButtonItemStylePlain
+                                   target:self
+                                   action:@selector(backButtonPressed:)];
+    //
+    self.navigationItem.leftBarButtonItems = @[backButton, self.composeBarButtonItem];
     
     _inboxArchiveControl = [[UISegmentedControl alloc] initWithItems:@[INBOX_STRING(), ARCHIVE_STRING()]];
     _inboxArchiveControl.selectedSegmentIndex = 0;
@@ -294,6 +302,13 @@ static CGFloat kOTRConversationCellHeight = 80.0;
 {
     if ([self.delegate respondsToSelector:@selector(conversationViewController:didSelectCompose:)]) {
         [self.delegate conversationViewController:self didSelectCompose:sender];
+    }
+}
+
+- (void)backButtonPressed:(id)sender
+{
+    if ([self.delegate respondsToSelector:@selector(conversationViewController:didSelectBack:)]) {
+        [self.delegate conversationViewController:self didSelectBack:sender];
     }
 }
 

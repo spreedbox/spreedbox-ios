@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "CBBD7F4259B1D52AFE8B4F85B9BDDBA97B437FE7",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "98D05BCBC40AE5315578EEE7C186D3063CCA59C3" : 9223372036854775807,
+    "CBBD7F4259B1D52AFE8B4F85B9BDDBA97B437FE7" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "EA6E808C-0CC5-4009-B190-4F16C2D2837C",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "98D05BCBC40AE5315578EEE7C186D3063CCA59C3" : "spreedbox-ios\/Submodules\/CPAProxy\/",
+    "CBBD7F4259B1D52AFE8B4F85B9BDDBA97B437FE7" : "spreedbox-ios\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "spreedbox",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "spreedbox.xcworkspace",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/ursachec\/CPAProxy.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "98D05BCBC40AE5315578EEE7C186D3063CCA59C3"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/PeterEdens\/spreedbox-ios.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "CBBD7F4259B1D52AFE8B4F85B9BDDBA97B437FE7"
+    }
+  ]
+}

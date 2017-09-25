@@ -16,7 +16,7 @@
 
 - (void)conversationViewController:(OTRConversationViewController *)conversationViewController didSelectThread:(id <OTRThreadOwner>)threadOwner;
 - (void)conversationViewController:(OTRConversationViewController *)conversationViewController didSelectCompose:(id)sender;
-
+- (void)conversationViewController:(OTRConversationViewController *)conversationViewController didSelectBack:(id)sender;
 @end
 
 /**
