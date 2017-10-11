@@ -26,6 +26,9 @@
 #import "CCManageAutoUpload.h"
 #import "NCBridgeSwift.h"
 
+
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 @interface CCPhotos () <CCActionsDeleteDelegate, CCActionsDownloadThumbnailDelegate>
 {
     tableMetadata *_metadata;

@@ -25,6 +25,9 @@
 
 #import "AppDelegate.h"
 
+
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 @implementation CCManageLocation
 
 

@@ -30,6 +30,8 @@
 #define fontSizeAction  [UIFont systemFontOfSize:14]
 #define fontSizeNote    [UIFont systemFontOfSize:14]
 
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 @interface CCActivity ()
 {
     BOOL _verbose;

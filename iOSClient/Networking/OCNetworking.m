@@ -29,6 +29,8 @@
 #import "NSString+Encode.h"
 #import "NCBridgeSwift.h"
 
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
 
 @interface OCnetworking ()

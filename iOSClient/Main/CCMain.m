@@ -35,6 +35,8 @@
 #import "NCAutoUpload.h"
 #import "NCBridgeSwift.h"
 
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 @interface CCMain () <CCActionsDeleteDelegate, CCActionsRenameDelegate, CCActionsSearchDelegate, CCActionsDownloadThumbnailDelegate, CCActionsSettingFavoriteDelegate, UITextViewDelegate, createFormUploadAssetsDelegate, MGSwipeTableCellDelegate, CCLoginDelegate, CCLoginDelegateWeb>
 {
     tableMetadata *_metadata;

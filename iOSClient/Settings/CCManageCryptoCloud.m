@@ -25,6 +25,9 @@
 #import "AppDelegate.h"
 #import "NCBridgeSwift.h"
 
+
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 @implementation CCManageCryptoCloud
 
 -(id)init

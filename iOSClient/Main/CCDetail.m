@@ -27,6 +27,9 @@
 #import "NCBridgeSwift.h"
 
 
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
+
 #define TOOLBAR_HEIGHT 49.0f
 
 #define alertRequestPasswordPDF 1

@@ -24,6 +24,7 @@
 #import "CCUploadFromOtherUpp.h"
 #import "AppDelegate.h"
 #import "NCBridgeSwift.h"
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
 
 @interface CCUploadFromOtherUpp()
 {

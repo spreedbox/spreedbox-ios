@@ -52,7 +52,7 @@
 	frame.size.height = floorf(frame.size.height);
 	[super setFrame:frame];
 
-	__weak typeof(self)weakSelf = self;
+	__weak __typeof(self)weakSelf = self;
 	dispatch_async(dispatch_get_main_queue(), ^{
 		weakSelf.progress = weakSelf.progress;
 	});

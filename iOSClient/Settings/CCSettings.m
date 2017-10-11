@@ -31,6 +31,9 @@
 #import "CCManageAccount.h"
 #import "NCBridgeSwift.h"
 
+
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 #define alertViewEsci 1
 #define alertViewAzzeraCache 2
 

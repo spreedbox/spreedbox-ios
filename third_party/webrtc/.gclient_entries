@@ -1,0 +1,3 @@
+entries = {
+  'src': 'https://github.com/strukturag/webrtc-ios.git',
+}

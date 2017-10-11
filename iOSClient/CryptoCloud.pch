@@ -37,4 +37,11 @@
 #import "CCGlobal.h"
 #import "NSNotificationCenter+MainThread.h"
 
+//pe
+#import "utils.h"
+#import "utils_objc.h"
+#import "CommonDefinitions.h"
+#import "CommonUIDefinitions.h"
+#import "NSObject+CDescription.h"
+
 #endif

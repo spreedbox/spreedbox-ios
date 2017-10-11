@@ -24,6 +24,8 @@
 #import "Acknowledgements.h"
 #import "AppDelegate.h"
 
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 @implementation Acknowledgements
 
 -  (id)initWithCoder:(NSCoder *)aDecoder

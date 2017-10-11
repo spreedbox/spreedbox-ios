@@ -61,11 +61,6 @@ static NSInteger _usesUntilPrompt = 20;
 static NSInteger _significantEventsUntilPrompt = -1;
 static double _timeBeforeReminding = 1;
 static BOOL _debug = NO;
-#if __IPHONE_OS_VERSION_MIN_REQUIRED < __IPHONE_5_0
-	static id<AppiraterDelegate> _delegate;
-#else
-	__weak static id<AppiraterDelegate> _delegate;
-#endif
 static BOOL _usesAnimation = TRUE;
 static UIStatusBarStyle _statusBarStyle;
 static BOOL _modalOpen = false;
@@ -143,7 +138,7 @@ static BOOL _alwaysUseMainBundle = NO;
     _debug = debug;
 }
 + (void)setDelegate:(id<AppiraterDelegate>)delegate{
-	_delegate = delegate;
+	Appirater.sharedInstance.delegate = delegate;
 }
 + (void)setUsesAnimation:(BOOL)animation {
 	_usesAnimation = animation;
@@ -268,7 +263,6 @@ static BOOL _alwaysUseMainBundle = NO;
         static dispatch_once_t onceToken;
         dispatch_once(&onceToken, ^{
             appirater = [[Appirater alloc] init];
-			appirater.delegate = _delegate;
             appirater.eventQueue = [[NSOperationQueue alloc] init];
             appirater.eventQueue.maxConcurrentOperationCount = 1;
             [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(appWillResignActive) name:
@@ -280,33 +274,39 @@ static BOOL _alwaysUseMainBundle = NO;
 }
 
 - (void)showRatingAlert:(BOOL)displayRateLaterButton {
-  UIAlertView *alertView = nil;
   id <AppiraterDelegate> delegate = _delegate;
     
   if(delegate && [delegate respondsToSelector:@selector(appiraterShouldDisplayAlert:)] && ![delegate appiraterShouldDisplayAlert:self]) {
       return;
   }
   
-  if (displayRateLaterButton) {
-  	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
-                                           message:self.alertMessage
-                                          delegate:self
-                                 cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
+  if (NSStringFromClass([SKStoreReviewController class]) != nil) {
+    // If SKStoreReviewController is used, skip the custom dialog and directly go the the rating 
+    [Appirater rateApp];
   } else {
-  	alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
-                                           message:self.alertMessage
-                                          delegate:self
-                                 cancelButtonTitle:self.alertCancelTitle
-                                 otherButtonTitles:self.alertRateTitle, nil];
+    // Otherwise show a custom Alert
+    UIAlertView *alertView = nil;
+    if (displayRateLaterButton) {
+      alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
+                                             message:self.alertMessage
+                                            delegate:self
+                                   cancelButtonTitle:self.alertCancelTitle
+                                   otherButtonTitles:self.alertRateTitle, self.alertRateLaterTitle, nil];
+    } else {
+      alertView = [[UIAlertView alloc] initWithTitle:self.alertTitle
+                                             message:self.alertMessage
+                                            delegate:self
+                                   cancelButtonTitle:self.alertCancelTitle
+                                   otherButtonTitles:self.alertRateTitle, nil];
+    }
+    
+    self.ratingAlert = alertView;
+    [alertView show];
   }
 
-	self.ratingAlert = alertView;
-    [alertView show];
-
-    if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
-             [delegate appiraterDidDisplayAlert:self];
-    }
+  if (delegate && [delegate respondsToSelector:@selector(appiraterDidDisplayAlert:)]) {
+           [delegate appiraterDidDisplayAlert:self];
+  }
 }
 
 - (void)showRatingAlert
@@ -628,9 +628,19 @@ static BOOL _alwaysUseMainBundle = NO;
 
 + (void)rateApp {
 	
+  //Use the built SKStoreReviewController if available (available from iOS 10.3 upwards)
+  if (NSStringFromClass([SKStoreReviewController class]) != nil) {
+    // Also note, that SKStoreReviewController takes care of impression limitation by itself so it's ok to not save the impression manually 
+    // This also works in the simulator
+    [SKStoreReviewController requestReview];
+    return;
+  }
+
 	NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
 	[userDefaults setBool:YES forKey:kAppiraterRatedCurrentVersion];
 	[userDefaults synchronize];
+
+  
 
 	//Use the in-app StoreKit view if available (iOS 6) and imported. This works in the simulator.
 	if (![Appirater sharedInstance].openInAppStore && NSStringFromClass([SKStoreProductViewController class]) != nil) {
@@ -654,17 +664,17 @@ static BOOL _alwaysUseMainBundle = NO;
 		#if TARGET_IPHONE_SIMULATOR
 		NSLog(@"APPIRATER NOTE: iTunes App Store is not supported on the iOS simulator. Unable to open App Store page.");
 		#else
-		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+		NSString *reviewURL = [templateReviewURL stringByReplacingOccurrencesOfString:@"APP_ID" withString:_appId];
 
 		// iOS 7 needs a different templateReviewURL @see https://github.com/arashpayan/appirater/issues/131
         // Fixes condition @see https://github.com/arashpayan/appirater/issues/205
 		if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 && [[[UIDevice currentDevice] systemVersion] floatValue] < 8.0) {
-			reviewURL = [templateReviewURLiOS7 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+			reviewURL = [templateReviewURLiOS7 stringByReplacingOccurrencesOfString:@"APP_ID" withString:_appId];
 		}
         // iOS 8 needs a different templateReviewURL also @see https://github.com/arashpayan/appirater/issues/182
         else if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 8.0)
         {
-            reviewURL = [templateReviewURLiOS8 stringByReplacingOccurrencesOfString:@"APP_ID" withString:[NSString stringWithFormat:@"%@", _appId]];
+            reviewURL = [templateReviewURLiOS8 stringByReplacingOccurrencesOfString:@"APP_ID" withString:_appId];
         }
 
 		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:reviewURL]];

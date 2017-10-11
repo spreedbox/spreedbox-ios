@@ -27,6 +27,8 @@
 
 #import "NCBridgeSwift.h"
 
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 @interface CCFavorites () <CCActionsDeleteDelegate, CCActionsSettingFavoriteDelegate>
 {
     NSArray *_dataSource;

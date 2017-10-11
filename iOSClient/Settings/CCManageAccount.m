@@ -27,6 +27,9 @@
 #import "NCAutoUpload.h"
 #import "NCBridgeSwift.h"
 
+
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 #define actionSheetCancellaAccount 1
 
 @interface CCManageAccount () <CCLoginDelegate, CCLoginDelegateWeb>

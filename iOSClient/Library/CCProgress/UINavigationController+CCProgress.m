@@ -177,7 +177,7 @@ CGFloat const SGProgressBarHeight = 2.0;
 {
 	if ([self hasCCProgressMask])
 	{
-		__weak typeof(self)weakSelf = self;
+		__weak __typeof(self)weakSelf = self;
 		__block NSTimeInterval timeInterval = 0;
 		dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 			while (timeInterval <= duration) {

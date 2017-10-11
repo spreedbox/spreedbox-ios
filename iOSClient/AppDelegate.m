@@ -41,6 +41,8 @@
 #import "NCBridgeSwift.h"
 #import "NCAutoUpload.h"
 
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 // PE: ChatSecure
 
 @import ChatSecureCore;

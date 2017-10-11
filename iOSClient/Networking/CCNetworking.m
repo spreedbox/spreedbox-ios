@@ -29,6 +29,8 @@
 #import "NSString+Encode.h"
 #import "NCBridgeSwift.h"
 
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 @interface CCNetworking ()
 {
     NSMutableDictionary *_taskData;

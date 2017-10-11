@@ -29,6 +29,8 @@
 #import "CCTransfersCell.h"
 #import "NCBridgeSwift.h"
 
+#define app ((AppDelegate *)[[UIApplication sharedApplication] delegate])
+
 #define download 1
 #define downloadwwan 2
 #define upload 3

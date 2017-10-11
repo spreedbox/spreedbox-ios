@@ -4,27 +4,76 @@
 
   },
   "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "5928309140879E871CA2C91C35635A4223DBC07C" : 9223372036854775807,
+    "11E4A14DE657962E959580CFD90EA146D53DDF28" : 9223372036854775807,
+    "E586194C5F0DE1AB55B82A996F1F710FBF8ED12C" : 9223372036854775807,
+    "BB8627304F9DCC5B0D7D6C8AA91B21867468F081" : 9223372036854775807,
     "98D05BCBC40AE5315578EEE7C186D3063CCA59C3" : 9223372036854775807,
-    "CBBD7F4259B1D52AFE8B4F85B9BDDBA97B437FE7" : 9223372036854775807
+    "CBBD7F4259B1D52AFE8B4F85B9BDDBA97B437FE7" : 9223372036854775807,
+    "F5750516C1B1014B205F3FCCB08DDD0226AAA141" : 9223372036854775807,
+    "DD20A1A48C66B5213E0FEBB87A95EF51D6C6F3E8" : 9223372036854775807,
+    "3692ABDCB445527429496D19963AFF94CAB1E068" : 9223372036854775807
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "EA6E808C-0CC5-4009-B190-4F16C2D2837C",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "5928309140879E871CA2C91C35635A4223DBC07C" : "spreedbox-ios\/third_party\/UICKeyChainStore\/",
+    "11E4A14DE657962E959580CFD90EA146D53DDF28" : "spreedbox-ios\/third_party\/ios_font_awesome\/",
+    "E586194C5F0DE1AB55B82A996F1F710FBF8ED12C" : "spreedbox-ios\/third_party\/sorteddictionary\/",
+    "BB8627304F9DCC5B0D7D6C8AA91B21867468F081" : "spreedbox-ios\/third_party\/ios-file-browser\/",
     "98D05BCBC40AE5315578EEE7C186D3063CCA59C3" : "spreedbox-ios\/Submodules\/CPAProxy\/",
-    "CBBD7F4259B1D52AFE8B4F85B9BDDBA97B437FE7" : "spreedbox-ios\/"
+    "CBBD7F4259B1D52AFE8B4F85B9BDDBA97B437FE7" : "spreedbox-ios\/",
+    "F5750516C1B1014B205F3FCCB08DDD0226AAA141" : "spreedbox-ios\/third_party\/DAKeyboardControl\/",
+    "DD20A1A48C66B5213E0FEBB87A95EF51D6C6F3E8" : "spreedbox-ios\/third_party\/AFNetworking\/",
+    "3692ABDCB445527429496D19963AFF94CAB1E068" : "spreedbox-ios\/third_party\/PocketSocket\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "spreedbox",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,
   "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "spreedbox.xcworkspace",
   "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
     {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/strukturag\/ios-fontawesome.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "11E4A14DE657962E959580CFD90EA146D53DDF28"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/strukturag\/PocketSocket.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "3692ABDCB445527429496D19963AFF94CAB1E068"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/strukturag\/UICKeyChainStore.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "5928309140879E871CA2C91C35635A4223DBC07C"
+    },
+    {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/ursachec\/CPAProxy.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "98D05BCBC40AE5315578EEE7C186D3063CCA59C3"
     },
     {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/strukturag\/file-browser-ios.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "BB8627304F9DCC5B0D7D6C8AA91B21867468F081"
+    },
+    {
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/PeterEdens\/spreedbox-ios.git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
       "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "CBBD7F4259B1D52AFE8B4F85B9BDDBA97B437FE7"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/AFNetworking\/AFNetworking.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "DD20A1A48C66B5213E0FEBB87A95EF51D6C6F3E8"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/strukturag\/SortedDictionary.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "E586194C5F0DE1AB55B82A996F1F710FBF8ED12C"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/strukturag\/DAKeyboardControl.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "F5750516C1B1014B205F3FCCB08DDD0226AAA141"
     }
   ]
 }
