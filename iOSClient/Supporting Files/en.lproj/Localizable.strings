@@ -565,4 +565,5 @@
 
 "_autoupload_filename_title_"       = "Auto upload filename";
 
-"_goto_chat_"                       = "SecureChat";
+"_goto_chat_"                       = "SecureIM";
+"_goto_meet_"                       = "SecureMeet";

@@ -102,9 +102,38 @@
 #import "../ChatSecure/Classes/View Controllers/OTRMessagesViewController.h"
 #import "../ChatSecure/Classes/View Controllers/OTRConversationViewController.h"
 
+// PE: SpreeMe
+
+#import "ChildRotationNavigationController.h"
+#import "ChildRotationTabBarController.h"
+
+#import "RecentChatsViewController.h"
+#import "SMRoomsViewController.h"
+#import "OptionsViewController.h"
+#import "FileBrowserControllerViewController.h"
+
+#import "FileSharingManagerObjC.h"
+#import "PeerConnectionController.h"
+#import "SettingsController.h"
+#import "SMAppIdentityController.h"
+#import "SMConnectionController.h"
+#import "SMLocalUserSettings.h"
+#import "SMLocalizedStrings.h"
+#import "STLocalNotificationManager.h"
+#import "TrustedSSLStore.h"
+#import "UsersActivityController.h"
+#import "UserInterfaceManager.h"
+
 @interface AppDelegate () <UNUserNotificationCenterDelegate, FIRMessagingDelegate>
 {
+
+    UIImageView *_screenshotCoverImageView;
+    BOOL _isFirstLaunch;
+    BOOL _isKeychainAccessible;
+    BOOL _appLaunchedWithoutKeychainAccess;
+    NSDictionary *_launchOptions;
     
+    BOOL _shouldSetupAudioSessionWhenAppBecomesActive;
 }
 
 @property (nonatomic, strong, readonly) __kindof OTRTheme *theme;
@@ -388,6 +417,121 @@
     
     
     return YES;
+}
+
+- (void)showMeet
+{
+    [SMAppIdentityController sharedInstance];
+    
+    if (_isFirstLaunch) {
+        [[SMAppIdentityController sharedInstance] initForFirstAppLaunch];
+        [UICKeyChainStore setString:kSMSpreedMeModeOnString forKey:kSpreedMeModeSettingsKey];
+    }
+    
+    self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+    // Override point for customization after application launch.
+    self.window.backgroundColor = kSMApplicationBackgroundColor;
+    
+    // Do not setup AVAudioSession if we are launched in background. Postpone it to appDidBecomeActive
+    //if (applicationState == UIApplicationStateBackground) {
+    //    _shouldSetupAudioSessionWhenAppBecomesActive = YES;
+    //    spreed_me_log("Postpone AVAudioSession initial setup to the time when app is active.");
+    //} else {
+        [self setupAudioSession];
+    //}
+    
+    [PeerConnectionController sharedInstance]; //start peer connection
+    
+    // App version
+    NSString *bundleVersion = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
+    if (![SettingsController sharedInstance].appVersion) {
+        [SettingsController sharedInstance].appVersion = bundleVersion;
+        
+    } else if ([SettingsController sharedInstance].appVersion.length > 0 &&
+               ![[SettingsController sharedInstance].appVersion isEqualToString:bundleVersion]) {
+        
+        spreed_me_log("Application is being updated from v:%s to v:%s !",
+                      [[SettingsController sharedInstance].appVersion cDescription],
+                      [bundleVersion cDescription]);
+        // Update app if needed
+        [SettingsController sharedInstance].appVersion = bundleVersion;
+    }
+    
+    // Just in case, set video settings to default settings
+    SMLocalUserSettings *defaultSettings = [SMLocalUserSettings defaultSettings];
+    [[PeerConnectionController sharedInstance] setVideoPreferencesWithCamera:defaultSettings.videoDeviceId
+                                                             videoFrameWidth:defaultSettings.frameWidth
+                                                            videoFrameHeight:defaultSettings.frameHeight
+                                                                         FPS:defaultSettings.fps];
+    
+    
+    /*
+     init FileSharingManager. This MUST be done after creation of _peerConnectionWrapperFactory and ChannelingManager.
+     At the moment ChannelingManager is created inside of PeerConnectionController so it is safe to create FileSharingManagerObjC after PeerConnectionController.
+     */
+    [FileSharingManagerObjC defaultManager];
+    
+    SMRoomsViewController *roomsViewController = [[SMRoomsViewController alloc] initWithNibName:@"SMRoomsViewController" bundle:nil];
+    NSString *directory = [[FileSharingManagerObjC defaultManager] fileLocation];
+    FileBrowserControllerViewController *fileBrowserViewController = [[FileBrowserControllerViewController alloc] initWithDirectoryPath:directory];
+    OptionsViewController *optionsViewController = [[OptionsViewController alloc] initWithNibName:@"OptionsViewController" bundle:nil];
+    RecentChatsViewController *recentChatsViewController = [[RecentChatsViewController alloc] initWithUserActivityController:[UsersActivityController sharedInstance]];
+    
+    ChildRotationTabBarController *tabbar = [[ChildRotationTabBarController alloc] init];
+    
+    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
+        [[UITabBar appearance] setTintColor:kSpreedMeBlueColor]; /*#00bbd7*/
+    } else {
+        [[UITabBar appearance] setTintColor:kGrayColor_f5f5f5];
+        [[UITabBarItem appearance] setTitleTextAttributes:@{UITextAttributeTextColor : kSpreedMeBlueColor,}
+                                                 forState:UIControlStateSelected];
+    }
+    
+    [[UITabBar appearance] setBackgroundColor:kGrayColor_f5f5f5];
+    
+    ChildRotationNavigationController *roomsViewControllerNavVC = [[ChildRotationNavigationController alloc] initWithRootViewController:roomsViewController];
+    ChildRotationNavigationController *fileBrowserViewControllerNavVC = [[ChildRotationNavigationController alloc] initWithRootViewController:fileBrowserViewController];
+    ChildRotationNavigationController *profileViewControllerNavVC = [[ChildRotationNavigationController alloc] initWithRootViewController:optionsViewController];
+    ChildRotationNavigationController *recentChatsViewControllerNavVC = [[ChildRotationNavigationController alloc] initWithRootViewController:recentChatsViewController];
+    
+    tabbar.viewControllers = @[roomsViewControllerNavVC, recentChatsViewControllerNavVC, fileBrowserViewControllerNavVC, profileViewControllerNavVC];
+    
+    [UserInterfaceManager sharedInstance].mainTabbarController = tabbar;
+    [UserInterfaceManager sharedInstance].callVCPresentationController = tabbar;
+    [UserInterfaceManager sharedInstance].roomsViewControllerNavVC = roomsViewControllerNavVC;
+    [UserInterfaceManager sharedInstance].optionsViewControllerNavVC = profileViewControllerNavVC;
+    [UserInterfaceManager sharedInstance].optionsViewController = optionsViewController;
+    [UserInterfaceManager sharedInstance].recentChatsViewController = recentChatsViewController;
+    [UserInterfaceManager sharedInstance].rootFileBrowserVC = fileBrowserViewController;
+    [UserInterfaceManager sharedInstance].roomsViewControllerTabbarIndex = 0;
+    [UserInterfaceManager sharedInstance].recentChatsViewControllerTabbarIndex = 1;
+    [UserInterfaceManager sharedInstance].rootFileBrowserVCTabbarIndex = 2;
+    [UserInterfaceManager sharedInstance].optionsViewControllerTabbarIndex = 3;
+    
+    [TrustedSSLStore sharedTrustedStore].viewControllerForActions = tabbar;
+    
+    self.window.rootViewController = tabbar;
+    [self.window makeKeyAndVisible];
+    
+    TabbarTabsEnableState tabbarState =
+    ([SMConnectionController sharedInstance].appLoginState == kSMAppLoginStatePromptUserToLogin) ?
+    kTabbarTabsEnableStateLoginRequired :
+    kTabbarTabsEnableStateIdle;
+    
+    [[UserInterfaceManager sharedInstance] setTabbarEnableState:tabbarState];
+    
+#ifdef SPREEDME
+    if (_isFirstLaunch) {
+        [[UserInterfaceManager sharedInstance] presentSpreedboxNotificationViewController];
+    }
+#endif
+    [STLocalNotificationManager sharedInstance].applicationIconBadgeNumber  = 0;
+    
+    //if (application.applicationState == UIApplicationStateBackground) {
+    //    spreed_me_log("Application has been launched in background!");
+    //    [self setupKeepAliveTimer:application];
+    //}
+    
 }
 
 - (void)showChat
@@ -2002,6 +2146,23 @@
 
 - (Class) themeClass {
     return [OTRTheme class];
+}
+
+
+#pragma mark - Audio Session initial setup
+
+- (void)setupAudioSession
+{
+    NSError *error = nil;
+    BOOL success = [[AVAudioSession sharedInstance] setCategory:AVAudioSessionCategorySoloAmbient error:&error];
+    if (!success) {
+        spreed_me_log("Error while setting AudioSession SoloAmbient category in AppDelegate didFinishLaunchingWithOptions %s", [error cDescription]);
+    }
+    error = nil;
+    success = [[AVAudioSession sharedInstance] setActive:YES error:&error];
+    if (!success) {
+        spreed_me_log("Error while setting AudioSession active in AppDelegate didFinishLaunchingWithOptions %s", [error cDescription]);
+    }
 }
 
 @end

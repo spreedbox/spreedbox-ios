@@ -109,6 +109,13 @@ class CCMore: UIViewController, UITableViewDelegate, UITableViewDataSource, CCLo
         item.url = "secure_chat"
         functionMenu.append(item)
         
+        // ITEM : Chat
+        item = OCExternalSites.init()
+        item.name = "_goto_meet_"
+        item.icon = "moreShares"
+        item.url = "secure_meet"
+        functionMenu.append(item)
+        
         /*
         // ITEM : Local storage
         item = OCExternalSites.init()
@@ -364,7 +371,12 @@ class CCMore: UIViewController, UITableViewDelegate, UITableViewDataSource, CCLo
             if let myDelegate = UIApplication.shared.delegate as? AppDelegate {
                 myDelegate.showChat()
             }
+        } else if item.url == "secure_meet" {
+            if let myDelegate = UIApplication.shared.delegate as? AppDelegate {
+                myDelegate.showMeet()
+            }
         }
+        
     }
     
     func tapLabelQuotaExternalSite() {

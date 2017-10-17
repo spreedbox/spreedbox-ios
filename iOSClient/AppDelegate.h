@@ -169,6 +169,10 @@
 // PE: ChatSecure
 - (void)showChat;
 
+// PE: SpreedMe
+- (void)showMeet;
+
+
 /** Only used from Database Unlock view. */
 - (void) showConversationViewController;
 
