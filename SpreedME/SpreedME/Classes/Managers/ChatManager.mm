@@ -22,7 +22,7 @@
 
 #import "ChatManager.h"
 
-#include <webrtc/base/helpers.h>
+#include <rtc_base/helpers.h>
 
 #import "JSONKit.h"
 

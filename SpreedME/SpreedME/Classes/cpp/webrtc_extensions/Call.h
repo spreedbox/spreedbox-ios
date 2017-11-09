@@ -26,7 +26,7 @@
 #include <iostream>
 #include <map>
 
-#include <talk/app/webrtc/mediastreaminterface.h>
+#include <api/mediastreaminterface.h>
 
 #include "CommonCppTypes.h"
 #include "MessageQueueInterface.h"
@@ -171,8 +171,8 @@ public:
 	virtual void Dispose();
 	
 	// ----------- Delegates, signalling handler
-	virtual void SetSignallingHandler(SignallingHandler *signallingHandler) { critSect_->Enter(); signallingHandler_ = signallingHandler; critSect_->Leave(); };
-	virtual void SetDelegate(CallDelegateInterface *delegate) { critSect_->Enter(); delegate_ = delegate; critSect_->Leave(); };
+	virtual void SetSignallingHandler(SignallingHandler *signallingHandler) { critSect_->AcquireLockExclusive(); signallingHandler_ = signallingHandler; critSect_->ReleaseLockExclusive(); };
+	virtual void SetDelegate(CallDelegateInterface *delegate) { critSect_->AcquireLockExclusive(); delegate_ = delegate; critSect_->ReleaseLockExclusive(); };
 	
 	
 	// ----------- Statistics and call information
@@ -182,14 +182,14 @@ public:
 	// This call does nothing if previous call has not finished gathering statistics.
 	virtual void RequestStatistics();
 
-	virtual CallState state() {critSect_->Enter(); CallState state = state_; critSect_->Leave(); return state;};
+	virtual CallState state() {critSect_->AcquireLockExclusive(); CallState state = state_; critSect_->ReleaseLockExclusive(); return state;};
 	
 	virtual std::vector<std::string> GetUsersIds();
 	virtual std::set<std::string> GetUsersIdsAsSet();
 	virtual int usersOnCallCount();
 	
-	virtual bool audioMuted() { critSect_->Enter(); bool audioMuted = audioMuted_; critSect_->Leave(); return audioMuted; };
-	virtual bool videoMuted() { critSect_->Enter(); bool videoMuted = videoMuted_; critSect_->Leave(); return videoMuted; };
+	virtual bool audioMuted() { critSect_->AcquireLockExclusive(); bool audioMuted = audioMuted_; critSect_->ReleaseLockExclusive(); return audioMuted; };
+	virtual bool videoMuted() { critSect_->AcquireLockExclusive(); bool videoMuted = videoMuted_; critSect_->ReleaseLockExclusive(); return videoMuted; };
 	
 	virtual bool HasVideo();
 	virtual size_t NumberOfLocalVideoStreams();
@@ -344,7 +344,7 @@ protected:
 
 	
 private:
-	Call() : critSect_(webrtc::CriticalSectionWrapper::CreateCriticalSection()) {};
+	Call() : critSect_(webrtc::RWLockWrapper::CreateRWLock()) {};
 	
 	// Utility methods
 	rtc::scoped_refptr<PeerConnectionWrapper> WrapperForUserId(const std::string &userId);
@@ -355,7 +355,7 @@ private:
 	void SetupPeerConnectionFactory();
 	
 	//variables--------------------------------------------------------------------------------
-	webrtc::CriticalSectionWrapper *critSect_;
+    webrtc::RWLockWrapper *critSect_;
 	
 	std::string callId_;
 	PeerConnectionWrapperFactory *peerConnectionWrapperFactory_; // we do NOT own it

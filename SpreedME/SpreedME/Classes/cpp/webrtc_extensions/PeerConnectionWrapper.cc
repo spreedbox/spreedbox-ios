@@ -27,18 +27,17 @@
 #include <stdexcept>
 
 #include <modules/audio_device/audio_device_impl.h>
-#include <talk/app/webrtc/mediastream.h>
-#include <talk/app/webrtc/mediastreaminterface.h>
-#include <talk/app/webrtc/mediaconstraintsinterface.h>
-#include <talk/app/webrtc/notifier.h>
-#include <talk/app/webrtc/videosource.h>
-#include <webrtc/base/json.h>
-#include <webrtc/base/physicalsocketserver.h>
-#include <webrtc/base/refcount.h>
-#include <webrtc/base/ssladapter.h>
-#include <webrtc/base/thread.h>
-#include <talk/session/media/mediasession.h>
-#include <talk/session/media/srtpfilter.h>
+#include <api/mediastream.h>
+#include <api/mediastreaminterface.h>
+#include <api/mediaconstraintsinterface.h>
+#include <api/notifier.h>
+#include <rtc_base/json.h>
+#include <rtc_base/physicalsocketserver.h>
+#include <rtc_base/refcount.h>
+#include <rtc_base/ssladapter.h>
+#include <rtc_base/thread.h>
+#include <pc/mediasession.h>
+#include <pc/srtpfilter.h>
 
 #include "cpp_utils.h"
 #include "MediaConstraints.h"
@@ -82,21 +81,21 @@ enum {
 #pragma mark - SPCSessioDescriptionMessageData
 #pragma mark -
 
-struct SPCSessioDescriptionMessageData : public rtc::MessageData {
+class SPCSessioDescriptionMessageData : public rtc::MessageData {
 	explicit SPCSessioDescriptionMessageData(webrtc::SessionDescriptionInterface *desc, std::string *recepientId)
-	: recepientId(recepientId), description(desc) {
+	: recepientId(*recepientId), description(desc) {
 	}
 	
-	rtc::scoped_ptr<std::string> recepientId;
-	rtc::scoped_ptr<webrtc::SessionDescriptionInterface> description;
+    std::string recepientId;
+    rtc::scoped_refptr<webrtc::SessionDescriptionInterface> description;
 };
 
 struct SPCReceivedChannelingMessageData : public rtc::MessageData {
 	explicit SPCReceivedChannelingMessageData(std::string *message)
-	: message(message) {
+	: message(*message) {
 	}
 	
-	rtc::scoped_ptr<std::string> message;
+    std::string message;
 };
 
 
@@ -113,7 +112,7 @@ PeerConnectionWrapper::~PeerConnectionWrapper()
 
 PeerConnectionWrapper::PeerConnectionWrapper(const std::string &factoryId,
 											 PeerConnectionWrapperDelegateInterface *delegate) :
-	_critSect(*webrtc::CriticalSectionWrapper::CreateCriticalSection()),
+	_critSect(*webrtc::RWLockWrapper::CreateRWLock()),
 	_descriptionWasCreated(false),
 	internalState_(kPCWIStateReady),
 	negotiationState_(kPCWNStateIdle),
@@ -292,7 +291,7 @@ void PeerConnectionWrapper::SendData(const void *data, size_t size, const std::s
 	ScopedRefPtrDataChannelInteface data_channel = this->DataChannelForName(dataChannelName);
 	if (data_channel && data_channel->state() == webrtc::DataChannelInterface::kOpen) {
 		
-		webrtc::DataBuffer buffer(rtc::Buffer(data, size), true);
+		webrtc::DataBuffer buffer(rtc::CopyOnWriteBuffer((const uint8_t*)data, size), true);
 		data_channel->Send(buffer);
 		
 	} else {
@@ -350,7 +349,7 @@ void PeerConnectionWrapper::OnDataChannelStateChange(webrtc::DataChannelInterfac
 													 webrtc::DataChannelInterface::DataState state)
 {
 	DataChannelStateMessageData *msgData = new DataChannelStateMessageData(data_channel, state);
-	workerThread_->Post(this, MSG_PCW_DCO_ON_DATA_CHANNEL_STATE_CHANGE, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_DCO_ON_DATA_CHANNEL_STATE_CHANGE, msgData);
 }
 
 
@@ -384,16 +383,16 @@ void PeerConnectionWrapper::OnDataChannelStateChange_w(webrtc::DataChannelInterf
 void PeerConnectionWrapper::OnDataChannelMessage(webrtc::DataChannelInterface *data_channel, webrtc::DataBuffer *buffer)
 {
 	DataChannelDataMessageData *msgData = new DataChannelDataMessageData(data_channel, buffer);
-	workerThread_->Post(this, MSG_PCW_DCO_ON_DATA_CHANNEL_MESSAGE, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_DCO_ON_DATA_CHANNEL_MESSAGE, msgData);
 }
 
 
 void PeerConnectionWrapper::OnDataChannelMessage_w(webrtc::DataChannelInterface *data_channel, webrtc::DataBuffer *buffer)
 {
-	rtc::Buffer data = buffer->data;
+	rtc::CopyOnWriteBuffer data = buffer->data;
 	std::string message;
 	if (!buffer->binary) {
-		message = std::string(data.data(), data.length());
+		message = std::string((const char*)data.data(), data.size());
 		spreed_me_log("Datachannel %p message:%s", data_channel, message.c_str());
 	} else {
 		spreed_me_log("Datachannel %p state %s", data_channel, "received binary buffer");
@@ -615,7 +614,7 @@ void PeerConnectionWrapper::SetupVideoRenderer(const std::string &streamLabel,
 			return;
 		}
 		
-		videoTrack->AddRenderer(renderer);
+		//videoTrack->AddRenderer(renderer);
 		
 		rendererInfo.videoView = renderer->videoView();
 		
@@ -673,7 +672,7 @@ void PeerConnectionWrapper::DeleteVideoRenderer(const std::string &streamLabel, 
 	if (videoTrack) {
 		std::map<std::string, VideoRenderer*>::iterator it = renderersMap_.find(rendererName);
 		if (it != renderersMap_.end()) {
-			videoTrack->RemoveRenderer(it->second);
+			//videoTrack->RemoveRenderer(it->second);
 			it->second->Shutdown(); // Shutdown renderer since they can have some timers or other stuff to render buffers
 									// which might not be there anymore. In case of VideoRendererIOS it tries to render
 									// Obj-C i420 frame which has shallow copy of frame buffer that is already released. 
@@ -744,7 +743,7 @@ void PeerConnectionWrapper::RequestStatisticsReportsForAllStreams()
 void PeerConnectionWrapper::ReceivedStatistics(webrtc::MediaStreamTrackInterface *track, webrtc::StatsReports reports)
 {
 	StatisticsReportMessageData *msgData = new StatisticsReportMessageData(track, reports);
-	workerThread_->Post(this, MSG_PCW_SO_ON_COMPLETE, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_SO_ON_COMPLETE, msgData);
 }
 
 
@@ -762,7 +761,7 @@ void PeerConnectionWrapper::OnSignalingChange(webrtc::PeerConnectionInterface::S
 {
 	PlainMessageData<webrtc::PeerConnectionInterface::SignalingState> *msgData =
 		new PlainMessageData<webrtc::PeerConnectionInterface::SignalingState>(new_state);
-	workerThread_->Post(this, MSG_PCW_PCO_ON_SIGNALING_CHANGE, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_SIGNALING_CHANGE, msgData);
 }
 
 void PeerConnectionWrapper::OnSignalingChange_w(webrtc::PeerConnectionInterface::SignalingState new_state)
@@ -796,7 +795,7 @@ void PeerConnectionWrapper::OnSignalingChange_w(webrtc::PeerConnectionInterface:
 
 void PeerConnectionWrapper::OnError()
 {
-	workerThread_->Post(this, MSG_PCW_PCO_ON_ERROR);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_ERROR);
 }
 
 
@@ -813,7 +812,7 @@ void PeerConnectionWrapper::OnStateChange(webrtc::PeerConnectionObserver::StateT
 {
 	PlainMessageData<webrtc::PeerConnectionObserver::StateType> *msgData =
 		new PlainMessageData<webrtc::PeerConnectionObserver::StateType>(state_changed);
-	workerThread_->Post(this, MSG_PCW_PCO_ON_STATE_CHANGE, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_STATE_CHANGE, msgData);
 }
 
 
@@ -836,7 +835,7 @@ void PeerConnectionWrapper::OnStateChange_w(webrtc::PeerConnectionObserver::Stat
 void PeerConnectionWrapper::OnAddStream(webrtc::MediaStreamInterface* stream)
 {
 	PointerMessageData<webrtc::MediaStreamInterface> *msgData = new PointerMessageData<webrtc::MediaStreamInterface>(stream);
-	workerThread_->Post(this, MSG_PCW_PCO_ON_ADD_STREAM, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_ADD_STREAM, msgData);
 }
 
 
@@ -852,7 +851,7 @@ void PeerConnectionWrapper::OnAddStream_w(webrtc::MediaStreamInterface* stream)
 void PeerConnectionWrapper::OnRemoveStream(webrtc::MediaStreamInterface* stream)
 {
 	PointerMessageData<webrtc::MediaStreamInterface> *msgData = new PointerMessageData<webrtc::MediaStreamInterface>(stream);
-	workerThread_->Post(this, MSG_PCW_PCO_ON_REMOVE_STREAM, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_REMOVE_STREAM, msgData);
 }
 
 
@@ -871,7 +870,7 @@ void PeerConnectionWrapper::OnDataChannel(webrtc::DataChannelInterface *data_cha
 	
 	PlainMessageData<ScopedRefPtrDataChannelInteface> *msgData =
 		new PlainMessageData<ScopedRefPtrDataChannelInteface>(scopedRefDataChannel);
-	workerThread_->Post(this, MSG_PCW_PCO_ON_DATA_CHANNEL, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_DATA_CHANNEL, msgData);
 }
 
 
@@ -905,7 +904,7 @@ void PeerConnectionWrapper::OnIceCandidate(const webrtc::IceCandidateInterface* 
 			new IceCandidateStringRepresentation(candidate->sdp_mid(), candidate->sdp_mline_index(), candidateString);
 		
 		PointerMessageData<IceCandidateStringRepresentation> *msgData = new PointerMessageData<IceCandidateStringRepresentation>(candidateStringRep);
-		workerThread_->Post(this, MSG_PCW_PCO_ON_ICE_CANDIDATE, msgData);
+		workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_ICE_CANDIDATE, msgData);
 	} else {
 		spreed_me_log("Broken candidate!");
 	}
@@ -924,7 +923,7 @@ void PeerConnectionWrapper::OnIceCandidate_w(IceCandidateStringRepresentation* c
 
 void PeerConnectionWrapper::OnRenegotiationNeeded()
 {
-	workerThread_->Post(this, MSG_PCW_PCO_ON_RENEGOTIATION_NEEDED);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_RENEGOTIATION_NEEDED);
 }
 
 
@@ -938,7 +937,7 @@ void PeerConnectionWrapper::OnIceConnectionChange(webrtc::PeerConnectionInterfac
 {
 	PlainMessageData<webrtc::PeerConnectionInterface::IceConnectionState> *msgData =
 	new PlainMessageData<webrtc::PeerConnectionInterface::IceConnectionState>(new_state);
-	workerThread_->Post(this, MSG_PCW_PCO_ON_ICE_CONNECTION_CHANGE, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_ICE_CONNECTION_CHANGE, msgData);
 }
 
 
@@ -984,7 +983,7 @@ void PeerConnectionWrapper::OnSuccess(webrtc::SessionDescriptionInterface* desc)
 {
 	PointerMessageData<webrtc::SessionDescriptionInterface> *msgData =
 		new PointerMessageData<webrtc::SessionDescriptionInterface>(desc);
-	workerThread_->Post(this, MSG_PCW_CSDO_ON_SUCCESS, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_CSDO_ON_SUCCESS, msgData);
 }
 
 
@@ -1014,7 +1013,7 @@ void PeerConnectionWrapper::OnSuccess_w(webrtc::SessionDescriptionInterface* des
 void PeerConnectionWrapper::OnFailure(const std::string& error)
 {
 	PlainMessageData<std::string> *msgData = new PlainMessageData<std::string>(error);
-	workerThread_->Post(this, MSG_PCW_CSDO_ON_FAILURE, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_CSDO_ON_FAILURE, msgData);
 }
 
 
@@ -1029,7 +1028,7 @@ void PeerConnectionWrapper::OnFailure_w(const std::string& error)
 void PeerConnectionWrapper::DescriptionIsSet(bool isLocalDesc, const std::string &sdType, const std::string &sdp)
 {
 	SettingSessionDescriptionMessageData *msgData = new SettingSessionDescriptionMessageData(isLocalDesc, sdType, sdp);
-	workerThread_->Post(this, MSG_PCW_SSDO_ON_SUCCESS, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_SSDO_ON_SUCCESS, msgData);
 }
 
 
@@ -1118,7 +1117,7 @@ void PeerConnectionWrapper::DescriptionIsSet_w(bool isLocalDesc, const std::stri
 void PeerConnectionWrapper::DescriptionSetFailed(bool isLocalDesc, const std::string &sdType, const std::string &sdp)
 {
 	SettingSessionDescriptionMessageData *msgData = new SettingSessionDescriptionMessageData(isLocalDesc, sdType, sdp);
-	workerThread_->Post(this, MSG_PCW_SSDO_ON_FAILURE, msgData);
+	workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_SSDO_ON_FAILURE, msgData);
 }
 
 
@@ -1201,7 +1200,7 @@ void PeerConnectionWrapper::SetupRemoteOffer(const std::string &sdp)
         replaceStringFromSdp(sdpString, "UDP/TLS/RTP/SAVPF", "RTP/SAVPF");
 		std::string fixedSdp = trim_sdp(sdpString);
 		webrtc::SessionDescriptionInterface* session_description(
-																 webrtc::CreateSessionDescription(type, fixedSdp));
+																 webrtc::CreateSessionDescription(type, fixedSdp, NULL));
 //		spreed_me_log("Remoter offer SDP \n%s", sdp.c_str());
 		if (!session_description) {
 			spreed_me_log("Can't parse received session description message.\n");
@@ -1229,7 +1228,7 @@ void PeerConnectionWrapper::SetupRemoteAnswer(const std::string &sdp)
 	
 	std::string fixedSdp = trim_sdp(sdp);
 	webrtc::SessionDescriptionInterface* session_description(
-															 webrtc::CreateSessionDescription(type, fixedSdp));
+															 webrtc::CreateSessionDescription(type, fixedSdp, NULL));
 	
 	
 	if (session_description) {
@@ -1269,7 +1268,7 @@ void PeerConnectionWrapper::SetupRemoteAnswer(const std::string &sdp)
 
 void PeerConnectionWrapper::SetupRemoteCandidate(const std::string &sdp_mid, int sdp_mline_index, const std::string &sdp)
 {
-	webrtc::IceCandidateInterface* iceCandidate(webrtc::CreateIceCandidate(sdp_mid, sdp_mline_index, sdp));
+	webrtc::IceCandidateInterface* iceCandidate(webrtc::CreateIceCandidate(sdp_mid, sdp_mline_index, sdp, NULL));
 //	spreed_me_log("cand:===>  %s, %d, %s", sdp_mid.c_str(), sdp_mline_index, sdp.c_str());
 	
 	if (!_descriptionWasCreated) {
@@ -1292,7 +1291,7 @@ void PeerConnectionWrapper::SetupLocalAnswer(webrtc::SessionDescriptionInterface
     // See https://code.google.com/p/webrtc/issues/detail?id=3962
     std::regex rex("a=rtpmap:(.*) rtx/(.*)\r\na=fmtp:(.*) apt=(.*)\r\n");
     replaceRegexFromSdp(sdp, rex, "");
-    desc = webrtc::CreateSessionDescription(sdType, sdp);
+    desc = webrtc::CreateSessionDescription(sdType, sdp, NULL);
 	if (negotiationState_ == kPCWNStateIdle) {
 		negotiationState_ = kPCWNStateWaitingForLocalAnswerToBeSet;
 		peer_connection_->SetLocalDescription(SpreedSetSessionDescriptionObserver::Create(this, true, sdType, sdp), desc);
@@ -1456,3 +1455,29 @@ void PeerConnectionWrapper::OnMessage(rtc::Message* msg)
 	}
 }
 
+void PeerConnectionWrapper::RenderFrame(const webrtc::VideoFrame* frame) {
+    
+}
+
+// Triggered when media is received on a new stream from remote peer.
+void PeerConnectionWrapper::OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream) {
+    
+}
+
+// Triggered when a remote peer close a stream.
+void PeerConnectionWrapper::OnRemoveStream(
+                    rtc::scoped_refptr<webrtc::MediaStreamInterface> stream) {
+    
+}
+
+// Called any time the IceGatheringState changes.
+void PeerConnectionWrapper::OnIceGatheringChange(
+                          webrtc::PeerConnectionInterface::IceGatheringState new_state) {
+    
+}
+
+// Triggered when a remote peer opens a data channel.
+void PeerConnectionWrapper::OnDataChannel(
+                                          rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel) {
+    
+}

@@ -477,6 +477,8 @@
     OptionsViewController *optionsViewController = [[OptionsViewController alloc] initWithNibName:@"OptionsViewController" bundle:nil];
     RecentChatsViewController *recentChatsViewController = [[RecentChatsViewController alloc] initWithUserActivityController:[UsersActivityController sharedInstance]];
     
+    CCMore *moreController = [[CCMore alloc] initWithNibName:@"More" bundle:nil];
+    
     ChildRotationTabBarController *tabbar = [[ChildRotationTabBarController alloc] init];
     
     if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
@@ -493,8 +495,9 @@
     ChildRotationNavigationController *fileBrowserViewControllerNavVC = [[ChildRotationNavigationController alloc] initWithRootViewController:fileBrowserViewController];
     ChildRotationNavigationController *profileViewControllerNavVC = [[ChildRotationNavigationController alloc] initWithRootViewController:optionsViewController];
     ChildRotationNavigationController *recentChatsViewControllerNavVC = [[ChildRotationNavigationController alloc] initWithRootViewController:recentChatsViewController];
+    ChildRotationNavigationController *moreViewControllerNavVC = [[ChildRotationNavigationController alloc] initWithRootViewController:moreController];
     
-    tabbar.viewControllers = @[roomsViewControllerNavVC, recentChatsViewControllerNavVC, fileBrowserViewControllerNavVC, profileViewControllerNavVC];
+    tabbar.viewControllers = @[roomsViewControllerNavVC, recentChatsViewControllerNavVC, fileBrowserViewControllerNavVC, profileViewControllerNavVC, moreViewControllerNavVC];
     
     [UserInterfaceManager sharedInstance].mainTabbarController = tabbar;
     [UserInterfaceManager sharedInstance].callVCPresentationController = tabbar;

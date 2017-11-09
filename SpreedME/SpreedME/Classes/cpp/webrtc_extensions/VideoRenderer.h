@@ -24,7 +24,7 @@
 #define __SpreedME__VideoRenderer__
 
 
-#include <talk/app/webrtc/mediastreaminterface.h>
+#include <api/mediastreaminterface.h>
 
 
 namespace spreedme {
@@ -38,7 +38,7 @@ public:
 	virtual ~VideoRendererDelegateInterface() {};
 };
 
-class VideoRenderer : public webrtc::VideoRendererInterface {
+    class VideoRenderer : public rtc::VideoSinkInterface<webrtc::VideoFrame> {
 	
 public:
 	
@@ -57,7 +57,7 @@ public:
 		}
 	};
 	
-	virtual void RenderFrame(const cricket::VideoFrame* frame) = 0;
+	virtual void RenderFrame(const webrtc::VideoFrame* frame) = 0;
 	
 	virtual void Shutdown() = 0;
 	
@@ -65,8 +65,11 @@ public:
 	virtual std::string videoTrackId() {return videoTrackId_;};
 	virtual std::string streamLabel() {return streamLabel_;};
 	virtual void *videoView() {return videoView_;};
-	
-protected:
+        void OnFrame(
+                                             const webrtc::VideoFrame& video_frame) {
+        };
+        
+    protected:
 	void *videoView_; // subclasses should release/free this object properly!
 	VideoRendererDelegateInterface *delegate_; // We don't own it
 	

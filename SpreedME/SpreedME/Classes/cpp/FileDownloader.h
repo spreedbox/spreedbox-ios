@@ -36,7 +36,7 @@ class FileDownloader;
 class FileDownloaderDelegateInterface {
 public:
 	virtual void DownloadHasBeenFinished(FileDownloader *fileDownloader, const std::string &filePath) = 0;
-	virtual void DownloadProgressHasChanged(FileDownloader *fileDownloader, uint64 bytesDownloaded) = 0;
+	virtual void DownloadProgressHasChanged(FileDownloader *fileDownloader, uint64_t bytesDownloaded) = 0;
 	virtual void DownloadHasBeenCanceled(FileDownloader *fileDownloader) = 0; // This signals that download has been canceled, at this point FileDownloader still lives and can have all internal structure.
 	virtual void DownloadHasFailed(FileDownloader *fileDownloader) = 0;
 	virtual void DownloadHasBeenPaused(FileDownloader *fileDownloader) = 0;
@@ -62,7 +62,7 @@ public:
 	// Now you can only add userIds
 	virtual void UpdateUserIds(std::set<std::string> userIds);
 	
-	virtual void SetDelegate(FileDownloaderDelegateInterface *delegate) {critSect_->Enter(); delegate_ = delegate; critSect_->Leave();};
+	virtual void SetDelegate(FileDownloaderDelegateInterface *delegate) {critSect_->AcquireLockExclusive(); delegate_ = delegate; critSect_->ReleaseLockExclusive();};
 	
 	virtual void StopFileTransfer();
 	virtual void PauseFileTransfer();

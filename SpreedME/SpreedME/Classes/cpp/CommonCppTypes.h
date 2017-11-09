@@ -25,8 +25,8 @@
 
 #include <map>
 
-#include <webrtc/base/refcount.h>
-#include <webrtc/base/messagehandler.h>
+#include <rtc_base/refcount.h>
+#include <rtc_base/messagehandler.h>
 
 #include "ChannelingConstants.h"
 #include "PeerConnectionWrapper.h"

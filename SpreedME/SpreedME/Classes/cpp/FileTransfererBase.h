@@ -33,14 +33,14 @@ namespace spreedme {
 struct FileInfo
 {
 	// Given fields
-	uint32 chunks;
+	uint32_t chunks;
 	std::string token;
 	std::string fileName;
 	std::string fileType;
 	unsigned long long fileSize;
 	
 	// calculated fields
-	uint32 chunkSize;
+	uint32_t chunkSize;
 };
 	
 
@@ -53,7 +53,7 @@ public:
 					   MessageQueueInterface *workerQueue,
 					   MessageQueueInterface *callbacksMessageQueue);
 	
-	FileInfo fileInfo() {critSect_->Enter(); FileInfo fileInfo = fileInfo_; critSect_->Leave(); return fileInfo;};
+	FileInfo fileInfo() {critSect_->AcquireLockExclusive(); FileInfo fileInfo = fileInfo_; critSect_->ReleaseLockExclusive(); return fileInfo;};
 	
 	virtual void StopFileTransfer() = 0;
 	virtual void PauseFileTransfer() = 0;

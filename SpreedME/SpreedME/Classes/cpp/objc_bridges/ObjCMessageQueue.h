@@ -41,16 +41,16 @@ public:
 	explicit ObjCMessageQueue(dispatch_queue_t dispatchQueue);
 	virtual ~ObjCMessageQueue();
 	
-	virtual void Post(rtc::MessageHandler *phandler, uint32 id, rtc::MessageData *pdata = NULL);
-	virtual void Send(rtc::MessageHandler *phandler, uint32 id, rtc::MessageData *pdata = NULL);
+	virtual void Post(rtc::MessageHandler *phandler, uint32_t id, rtc::MessageData *pdata = NULL);
+	virtual void Send(rtc::MessageHandler *phandler, uint32_t id, rtc::MessageData *pdata = NULL);
 	virtual void PostDelayed(int cmsDelay,
 							 rtc::MessageHandler *phandler,
-							 uint32 id,
+							 uint32_t id,
 							 rtc::MessageData *pdata = NULL);
 	
 	// Be careful when using Clear() in ObjCMessageQueue since there is no way to clear ObjCMessageQueue
 	virtual void Clear(rtc::MessageHandler *phandler,
-					   uint32 id = rtc::MQID_ANY,
+					   uint32_t id = rtc::MQID_ANY,
 					   rtc::MessageList* removed = NULL) {};
 	
 private:

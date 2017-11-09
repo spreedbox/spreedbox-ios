@@ -28,7 +28,7 @@
 
 #import <GLKit/GLKit.h>
 
-#import <talk/app/webrtc/objc/public/RTCOpenGLVideoRenderer.h>
+#import "RTCOpenGLVideoRenderer.h"
 
 
 // RTCDisplayLinkTimer wraps a CADisplayLink and is set to fire every two screen

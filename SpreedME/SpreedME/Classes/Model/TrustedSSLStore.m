@@ -183,7 +183,9 @@ NSString * const kTrustedSSLStoreCertificate                = @"kTrustedSSLStore
 		}
 		base64String = [base64String stringByAppendingString:separator];
 		
-		certificatesString = [certificatesString stringByAppendingString:base64String];
+        if (base64String != nil) {
+            certificatesString = [certificatesString stringByAppendingString:base64String];
+        }
 	}
 	
 	[_lock unlock];
@@ -226,7 +228,7 @@ NSString * const kTrustedSSLStoreCertificate                = @"kTrustedSSLStore
 - (void)addCertificateToUserProposalQueue:(SSLCertificate *)certificate
 {
 	if (certificate) {
-		[_pendingCertificates setObject:certificate forKey:certificate.uId];
+		//[_pendingCertificates setObject:certificate forKey:certificate.uId];
 	}
 }
 

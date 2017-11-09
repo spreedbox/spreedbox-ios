@@ -26,7 +26,7 @@
 #include <iostream>
 #include <map>
 
-#include <webrtc/base/refcount.h>
+#include <rtc_base/refcount.h>
 
 #include "FileDownloader.h"
 #include "FileTransfererBase.h"
@@ -43,7 +43,7 @@ class FileSharingManagerDelegateInterface
 {
 public:
 	virtual void DownloadHasBeenFinished(const std::string &token, const std::string &filePath) = 0;
-	virtual void DownloadProgressHasChanged(const std::string &token, uint64 bytesDownloaded, double estimatedFinishTimeInterval) = 0;
+	virtual void DownloadProgressHasChanged(const std::string &token, uint64_t bytesDownloaded, double estimatedFinishTimeInterval) = 0;
 	virtual void DownloadHasBeenCanceled(const std::string &token) = 0;
 	virtual void DownloadHasFailed(const std::string &token) = 0;
 	virtual void DownloadHasBeenPaused(const std::string &token) = 0;
@@ -97,7 +97,7 @@ protected:
 	
 	// FileDownloaderDelegateInterface implementation
 	virtual void DownloadHasBeenFinished(FileDownloader *fileDownloader, const std::string &filePath);
-	virtual void DownloadProgressHasChanged(FileDownloader *fileDownloader, uint64 bytesDownloaded);
+	virtual void DownloadProgressHasChanged(FileDownloader *fileDownloader, uint64_t bytesDownloaded);
 	virtual void DownloadHasBeenCanceled(FileDownloader *fileDownloader);
 	virtual void DownloadHasFailed(FileDownloader *fileDownloader);
 	virtual void DownloadHasBeenPaused(FileDownloader *fileDownloader);
@@ -110,7 +110,7 @@ protected:
 	virtual rtc::scoped_refptr<FileDownloader> FileDownloaderForToken(const std::string &token); // returns active and paused downloaders
 	
 	
-	webrtc::CriticalSectionWrapper *critSect_;
+	webrtc::RWLockWrapper *critSect_;
 	
 	TokenToFileUploaderMap activeFileUploaders_;
 	TokenToFileUploaderMap stoppedFileUploaders_;

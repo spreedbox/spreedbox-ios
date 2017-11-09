@@ -28,11 +28,11 @@
 #include <regex>
 
 #include <modules/audio_device/include/audio_device.h>
-#include <system_wrappers/interface/critical_section_wrapper.h>
-#include <talk/app/webrtc/mediastreaminterface.h>
-#include <talk/app/webrtc/peerconnectioninterface.h>
-#include <webrtc/base/messagehandler.h>
-#include <webrtc/base/messagequeue.h>
+#include <system_wrappers/include/rw_lock_wrapper.h>
+#include <api/mediastreaminterface.h>
+#include <api/peerconnectioninterface.h>
+#include <rtc_base/messagehandler.h>
+#include <rtc_base/messagequeue.h>
 #include <third_party/jsoncpp/source/include/json/json.h>
 
 #include "Error.h"
@@ -133,7 +133,7 @@ class SpreedSetSessionDescriptionObserver;
 class PeerConnectionWrapper : public webrtc::PeerConnectionObserver,
 							  public webrtc::CreateSessionDescriptionObserver,
 							  public rtc::MessageHandler,
-							  public VideoRendererDelegateInterface
+                                public VideoRendererDelegateInterface
 {
 public:
 	
@@ -224,7 +224,23 @@ public:
 	virtual std::string userId() {return userId_;};
 	
 	virtual std::string factoryId() {return factoryId_;};
-	
+    
+    virtual void RenderFrame(const webrtc::VideoFrame* frame);
+    
+    // Triggered when media is received on a new stream from remote peer.
+    virtual void OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream);
+    
+    // Triggered when a remote peer close a stream.
+    virtual void OnRemoveStream(
+                                rtc::scoped_refptr<webrtc::MediaStreamInterface> stream);
+    
+    // Called any time the IceGatheringState changes.
+    virtual void OnIceGatheringChange(
+                                      webrtc::PeerConnectionInterface::IceGatheringState new_state);
+    // Triggered when a remote peer opens a data channel.
+    virtual void OnDataChannel(
+                               rtc::scoped_refptr<webrtc::DataChannelInterface> data_channel);
+
 protected:
     
     //
@@ -286,7 +302,7 @@ private:
     void replaceRegexFromSdp(std::string& str, std::regex& regex, const std::string& replace_with);
 	
 // Variables
-    webrtc::CriticalSectionWrapper & _critSect;
+    webrtc::RWLockWrapper & _critSect;
     rtc::scoped_refptr<webrtc::PeerConnectionInterface> peer_connection_;
 	rtc::Thread *workerThread_;
     std::map< std::string, rtc::scoped_refptr<webrtc::MediaStreamInterface> > local_active_streams_;

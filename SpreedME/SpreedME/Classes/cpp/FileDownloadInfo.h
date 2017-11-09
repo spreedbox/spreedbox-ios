@@ -25,7 +25,7 @@
 
 #include <iostream>
 
-#include <webrtc/base/basictypes.h>
+#include <rtc_base/basictypes.h>
 
 #include "CommonCppTypes.h"
 #include "FileTransfererBase.h"
@@ -43,7 +43,7 @@ struct DownloadStatusPair
 	DownloadStatusPair() : isCurrentlyDownloading(false), chunkNumber(UINT32_MAX) {};
 	
 	bool isCurrentlyDownloading;
-	uint32 chunkNumber;
+	uint32_t chunkNumber;
 };
 
 typedef std::map<UniqueDownloadDataChannelId, DownloadStatusPair> FreeDownloadersMap; // boolean value means true->downloader is downloading; false->downloader is free
@@ -64,11 +64,11 @@ public:
 	void SetChunkStatus(int chunkNumber, ChunkDownloadStatus status); // We assume here that if chunk was already downloaded it can't be set to kChunkIsNotDownloaded status again.
 	ChunkDownloadStatus ChunkStatus(int chunkNumber);
 	
-	uint32 GetNextChunkNumberToDownload();
+	uint32_t GetNextChunkNumberToDownload();
 	bool HasChunksToDownload();
 	bool AreAllDownloadersFree();
 	
-	uint32 downloadedChunksCount() {return downloadedChunksCount_;};
+	uint32_t downloadedChunksCount() {return downloadedChunksCount_;};
 	
 	void AddDownloadStatusPair(const UniqueDownloadDataChannelId &dataChannelId, const DownloadStatusPair &pair); // If pair exist changes its contents to given argument, if not inserts new
 	void SetDownloadStatusPair(const UniqueDownloadDataChannelId &dataChannelId, const DownloadStatusPair &pair); // if pair doesn't exist does nothing
@@ -79,11 +79,11 @@ public:
 private:
 	DownloadFileInfo();
 	
-	uint8 *chunksMap_;
-	std::queue<uint32> chunksToDownload_;
+	uint8_t *chunksMap_;
+	std::queue<uint32_t> chunksToDownload_;
 	FileInfo fileInfo_;
-	uint32 lastRequestedChunkNumber_;
-	uint32 downloadedChunksCount_;
+	uint32_t lastRequestedChunkNumber_;
+	uint32_t downloadedChunksCount_;
 	
 	uint64_t timeoutStart_;
 };

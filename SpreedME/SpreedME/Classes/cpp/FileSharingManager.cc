@@ -22,7 +22,7 @@
 
 #include "FileSharingManager.h"
 
-#include <webrtc/base/thread.h>
+#include <rtc_base/thread.h>
 
 #include "ObjCMessageQueue.h"
 #include "TalkBaseThreadWrapper.h"
@@ -33,7 +33,7 @@ FileSharingManager::FileSharingManager(PeerConnectionWrapperFactory *peerConnect
 									   SignallingHandler *signallingHandler,
 									   MessageQueueInterface *workerQueue,
 									   MessageQueueInterface *callbackQueue) :
-	critSect_(webrtc::CriticalSectionWrapper::CreateCriticalSection()),
+	critSect_(webrtc::RWLockWrapper::CreateRWLock()),
 	peerConnectionWrapperFactory_(peerConnectionWrapperFactory),
 	signallingHandler_(signallingHandler),
 	workerQueue_(workerQueue),
@@ -173,7 +173,7 @@ void FileSharingManager::DownloadHasBeenFinished(FileDownloader *fileDownloader,
 }
 
 
-void FileSharingManager::DownloadProgressHasChanged(FileDownloader *fileDownloader, uint64 bytesDownloaded)
+void FileSharingManager::DownloadProgressHasChanged(FileDownloader *fileDownloader, uint64_t bytesDownloaded)
 {
 	if (delegate_) {
 		delegate_->DownloadProgressHasChanged(fileDownloader->fileInfo().token, bytesDownloaded, 0.0);

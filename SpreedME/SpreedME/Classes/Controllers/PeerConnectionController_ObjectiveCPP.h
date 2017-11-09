@@ -23,9 +23,9 @@
 #import "PeerConnectionController.h"
 
 #include <string>
-#include <talk/app/webrtc/mediastreaminterface.h>
-#include <talk/app/webrtc/statstypes.h>
-#include <webrtc/base/scoped_ref_ptr.h>
+#include <api/mediastreaminterface.h>
+#include <api/statstypes.h>
+#include <rtc_base/scoped_ref_ptr.h>
 
 #include "WebrtcCommonDefinitions.h"
 

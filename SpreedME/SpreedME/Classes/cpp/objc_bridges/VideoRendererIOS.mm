@@ -24,8 +24,8 @@
 
 #import "SMRTCVideoRenderView.h"
 
-#include <talk/app/webrtc/objc/public/RTCI420Frame.h>
-#include <talk/app/webrtc/objc/RTCI420Frame+Internal.h>
+#include "RTCI420Frame.h"
+#include "RTCI420Frame+Internal.h"
 
 using namespace spreedme;
 
@@ -60,7 +60,7 @@ VideoRendererIOS::~VideoRendererIOS()
 }
 
 
-void VideoRendererIOS::RenderFrame(const cricket::VideoFrame* frame)
+void VideoRendererIOS::RenderFrame(const webrtc::VideoFrame* frame)
 {
 	RTCI420Frame* i420Frame = [[RTCI420Frame alloc] initWithVideoFrame:frame];
 	

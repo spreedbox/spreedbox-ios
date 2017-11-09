@@ -27,12 +27,13 @@
 #include <deque>
 #include <map>
 
-#include <system_wrappers/interface/critical_section_wrapper.h>
-#include <talk/app/webrtc/mediastreaminterface.h>
-#include <webrtc/base/thread.h>
-#include <talk/media/devices/devicemanager.h>
-#include <modules/video_capture/include/video_capture_defines.h>
+#include <system_wrappers/include/rw_lock_wrapper.h>
+#include <api/mediastreaminterface.h>
+#include <rtc_base/thread.h>
+//#include <talk/media/devices/devicemanager.h>
+#include <modules/video_capture/video_capture_defines.h>
 #include <modules/video_capture/video_capture_impl.h>
+#include <media/base/videosourceinterface.h>
 
 #include "CommonCppTypes.h"
 #include "PeerConnectionWrapper.h"
@@ -100,7 +101,7 @@ private:
 	std::string GetNewSpreedPeerConnectionId();
 
 // Variables
-    webrtc::CriticalSectionWrapper & _critSect;
+    webrtc::RWLockWrapper & _critSect;
     rtc::scoped_refptr<webrtc::PeerConnectionFactoryInterface> peer_connection_factory_;
 	
 	rtc::Thread *worker_thread_;
@@ -110,8 +111,10 @@ private:
 	
 	rtc::scoped_refptr<webrtc::AudioDeviceModule> adm_;
 	rtc::scoped_refptr<webrtc::AudioSourceInterface> audioSource_;
-	rtc::scoped_ptr<cricket::DeviceManagerInterface> deviceManager_;
-	rtc::scoped_refptr<webrtc::VideoSourceInterface> videoSource_;
+	//rtc::scoped_ptr<cricket::DeviceManagerInterface> deviceManager_;
+    std::unique_ptr<cricket::VideoCapturer> OpenVideoCaptureDevice();
+    rtc::scoped_refptr<webrtc::VideoTrackSourceInterface > videoSource_;
+    std::unique_ptr<cricket::VideoCapturer> capturer_;
 	
 	webrtc::videocapturemodule::VideoCaptureImpl::DeviceInfo *videoDeviceInfo_;
 	

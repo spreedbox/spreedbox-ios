@@ -24,9 +24,9 @@
 
 #include <stdexcept>
 
-#include <webrtc/base/base64.h>
-#include <webrtc/base/json.h>
-#include <webrtc/base/helpers.h>
+#include <rtc_base/base64.h>
+#include <rtc_base/json.h>
+#include <rtc_base/helpers.h>
 
 #include "utils.h"
 
@@ -109,7 +109,7 @@ Call::Call(std::string selfId,
 		   SignallingHandler* signallingHandler,
 		   MessageQueueInterface *workerQueue,
 		   MessageQueueInterface *callbackQueue) :
-	critSect_(webrtc::CriticalSectionWrapper::CreateCriticalSection()),
+critSect_(webrtc::RWLockWrapper::CreateRWLock()),
 	peerConnectionWrapperFactory_(peerConnectionWrapperFactory),
 	signallingHandler_(signallingHandler),
 	state_(kSMCStateReady),
@@ -124,7 +124,7 @@ Call::Call(std::string selfId,
 	workerQueue_(workerQueue),
 	callbackQueue_(callbackQueue)
 {
-	ASSERT(workerQueue_ != callbackQueue_);
+	//ASSERT(workerQueue_ != callbackQueue_);
 	callDeleter_ = new CallDeleter(this);
 	callId_ = std::string();
 	bool success = rtc::CreateRandomString(10, &callId_);
@@ -188,12 +188,12 @@ void Call::Dispose_w()
 
 std::vector<std::string> Call::GetUsersIds()
 {
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	std::vector<std::string> vector;
 	for (UserIdToWrapperMap::iterator it = activeConnections_.begin(); it != activeConnections_.end(); it++) {
 		vector.push_back(it->first);
 	}
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 	
 	return vector;
 }
@@ -201,12 +201,12 @@ std::vector<std::string> Call::GetUsersIds()
 
 std::set<std::string> Call::GetUsersIdsAsSet()
 {
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	std::set<std::string> set;
 	for (UserIdToWrapperMap::iterator it = activeConnections_.begin(); it != activeConnections_.end(); it++) {
 		set.insert(it->first);
 	}
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 	return set;
 }
 
@@ -214,9 +214,9 @@ std::set<std::string> Call::GetUsersIdsAsSet()
 
 int Call::usersOnCallCount()
 {
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	int activeConnectionsSize = (int)activeConnections_.size();
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 	
 	return activeConnectionsSize;
 }
@@ -248,7 +248,7 @@ size_t Call::NumberOfRemoteStreams()
 
 size_t Call::NumberOfStreams(bool local, bool countVideoStreamsOnly)
 {
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	size_t numberOfStreams = 0;
 	
 	for (UserIdToWrapperMap::iterator it = activeConnections_.begin(); it != activeConnections_.end(); it++) {
@@ -264,7 +264,7 @@ size_t Call::NumberOfStreams(bool local, bool countVideoStreamsOnly)
 		}
 	}
 	
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 	
 	return numberOfStreams;
 }
@@ -331,9 +331,9 @@ rtc::scoped_refptr<PeerConnectionWrapper> Call::CreatePeerConnectionWrapper(cons
 
 bool Call::InsertNewWrapperWithUserId(rtc::scoped_refptr<PeerConnectionWrapper> wrapper, std::string userId)
 {
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	std::pair<UserIdToWrapperMap::iterator , bool> ret = activeConnections_.insert(std::pair< std::string, rtc::scoped_refptr<PeerConnectionWrapper> >(userId, wrapper));
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 	return ret.second;
 }
 
@@ -703,7 +703,7 @@ void Call::FinishCall(ByeReason reason, bool shouldSendBye, CallFinishReason cal
 
 void Call::CloseCall(ByeReason reason, bool sendBye)
 {
-	webrtc::CriticalSectionScoped sc(critSect_);
+	webrtc::WriteLockScoped sc(*critSect_);
 	
 	for (UserIdToWrapperMap::iterator it = activeConnections_.begin(); it != activeConnections_.end(); ++it) {
 		if (sendBye) {
@@ -724,7 +724,7 @@ void Call::CloseCall(ByeReason reason, bool sendBye)
 
 void Call::HangUpUser(const std::string &userId)
 {
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	
 	UserIdToWrapperMap::iterator it = activeConnections_.find(userId);
 	if (it != activeConnections_.end()) {
@@ -737,7 +737,7 @@ void Call::HangUpUser(const std::string &userId)
 		conferenceId_ = std::string(); // since server downgrades to single call mode we need to do it either in order to interact properly
 	}
 	
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 	
 	this->SendBye(userId, kByeReasonNotSpecified);
 }
@@ -768,9 +768,9 @@ void Call::MuteAudio_w(bool onOff)
 	for (UserIdToWrapperMap::iterator it = activeConnections_.begin(); it != activeConnections_.end(); it++) {
 		it->second->SetMuteAudio(onOff);
 	}
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	audioMuted_ = onOff;
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 }
 
 
@@ -800,9 +800,9 @@ void Call::MuteVideo_w(bool onOff)
 	for (UserIdToWrapperMap::iterator it = activeConnections_.begin(); it != activeConnections_.end(); it++) {
 		it->second->SetMuteVideo(onOff);
 	}
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	videoMuted_ = onOff;
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 }
 
 
@@ -1167,10 +1167,10 @@ void Call::ReceivedConferenceDocument(const Json::Value &conferenceJson)
 
 void Call::IceConnectionStateChanged(webrtc::PeerConnectionInterface::IceConnectionState new_state, PeerConnectionWrapper *peerConnectionWrapper)
 {
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	bool isWrapperRegistered = this->CheckIfRegisteredWrapper(peerConnectionWrapper);
 	std::string userId = peerConnectionWrapper->userId();
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 	if (isWrapperRegistered) {
 		switch (new_state) {
 			case webrtc::PeerConnectionInterface::kIceConnectionNew:
@@ -1692,7 +1692,7 @@ void Call::OnMessage(rtc::Message *msg)
 			break;
 			
 		default:
-			ASSERT(false && "Not implemented");
+			//ASSERT(false && "Not implemented");
 			break;
 	}
 }

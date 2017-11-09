@@ -34,13 +34,13 @@ DownloadFileInfo::DownloadFileInfo(const FileInfo &fileInfo) :
 	downloadedChunksCount_(0),
 	timeoutStart_(0)
 {
-	uint32 mapArraySize = fileInfo_.chunks;
+	uint32_t mapArraySize = fileInfo_.chunks;
 	if (mapArraySize == UINT32_MAX) {
 		spreed_me_log("Chunk number is equal to UINT32_MAX. This is bad!");
 		assert(false);
 	}
 	
-	chunksMap_ = new uint8[mapArraySize];
+	chunksMap_ = new uint8_t[mapArraySize];
 	if (chunksMap_) {
 		memset(chunksMap_, 0, mapArraySize);
 	}
@@ -86,9 +86,9 @@ ChunkDownloadStatus DownloadFileInfo::ChunkStatus(int chunkNumber)
 }
 
 
-uint32 DownloadFileInfo::GetNextChunkNumberToDownload()
+uint32_t DownloadFileInfo::GetNextChunkNumberToDownload()
 {
-	uint32 chunkNumber = UINT32_MAX;
+	uint32_t chunkNumber = UINT32_MAX;
 	
 	if (lastRequestedChunkNumber_ < fileInfo_.chunks - 1) {
 		if (chunksToDownload_.size() < CHUNKS_TO_DOWNLOAD_QUEUE_MAX_SIZE) {

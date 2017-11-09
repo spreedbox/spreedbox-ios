@@ -45,11 +45,12 @@
 #import "UserInterfaceManager.h"
 #import "UsersManager.h"
 
+#import "SpreedboxInfo.h"
 
 NSString * const kDefaultServer		= @"api.spreed.me:443";
 
-NSString * const kWebSocketEndpoint = @"/ws";
-NSString * const kRESTAPIEndpoint = @"/api/v1";
+NSString * const kWebSocketEndpoint = @"/webrtc/ws";
+NSString * const kRESTAPIEndpoint = @"/index.php/apps/spreedme/api/v1";
 NSString * const kImagesEndpoint = @"/static/img";
 NSString * const kWellKnownEndpoint = @"/.well-known/spreed-configuration";
 NSString * const kServerConfigEndpoint = @"/config";
@@ -254,15 +255,21 @@ typedef enum : NSInteger {
         }
 			
 		
-        if (_spreedMeMode) {
+        /*if (_spreedMeMode) {
             [self refreshEndpointsURLsWithUserServerString:kDefaultServer];
             _appLoginState = kSMAppLoginStatePromptUserToLogin;
-        } else if (_ownCloudMode){
-            [self refreshEndpointsURLsWithOwnCloudServerString:[SettingsController sharedInstance].lastConnectedOCServer andSpreedMeServerString:[SettingsController sharedInstance].lastConnectedOCSMServer];
-            _appLoginState = kSMAppLoginStatePromptUserToLogin;
-        } else {
+        } else if (_ownCloudMode){*/
+        // PE:
+        NSString* server = [SpreedboxInfo getServerName];
+
+        [SettingsController sharedInstance].lastConnectedOCServer = [server copy];
+        [SettingsController sharedInstance].lastConnectedOCSMServer = [server copy];
+        
+        [self refreshEndpointsURLsWithOwnCloudServerString:[SettingsController sharedInstance].lastConnectedOCServer andSpreedMeServerString:[SettingsController sharedInstance].lastConnectedOCSMServer];
+        _appLoginState = kSMAppLoginStatePromptUserToLogin;
+        /*} else {
             _appLoginState = kSMAppLoginStateNoLoginRequired;
-        }
+        }*/
         
 		
 		if (usersManager.currentUser.wasConnected) {
@@ -737,7 +744,7 @@ typedef enum : NSInteger {
 
 - (void)connectToNewServer:(NSString *)newServer
 {
-    _ownCloudMode = NO;
+    _ownCloudMode = YES;
 	
     [UsersManager defaultManager].currentUser = [[SMLocalUser alloc] init];
 	[UsersManager defaultManager].currentUser.settings.serverString = newServer;
@@ -1384,7 +1391,7 @@ typedef enum : NSInteger {
 
 - (void)loginOCWithUsername:(NSString *)username password:(NSString *)password serverEndpoint:(NSString *)serverRESTAPIEndpoint
 {
-    if (username.length == 0 || password.length == 0) {
+    if (username.length == 0 || password.length == 0 || serverRESTAPIEndpoint == nil) {
         [self userFailedToLoginWithReason:kSMLoginFailReasonIncorrectUserNameOrPassword];
         return;
     }
@@ -1392,6 +1399,12 @@ typedef enum : NSInteger {
     [self stopTryingToReconnect];
     
     _state = kSMConnectionStateInternalWaitingForAppToken;
+    
+    if ([SettingsController sharedInstance].lastConnectedOCServer == nil) {
+        
+        // PE:
+        [SettingsController sharedInstance].lastConnectedOCServer = [SpreedboxInfo getServerName];
+    }
     
     [self refreshEndpointsURLsWithOwnCloudServerString:[SettingsController sharedInstance].lastConnectedOCServer andSpreedMeServerString:[SettingsController sharedInstance].lastConnectedOCSMServer];
     

@@ -27,7 +27,7 @@
 #import <AVFoundation/AVFoundation.h>
 
 // webrtc
-#include <webrtc/modules/video_render/ios/video_render_ios_view.h>
+//#include "video_render_ios_view.h"
 
 // webrtc extensions
 #include "PeerConnectionWrapperFactory.h"
@@ -1759,16 +1759,14 @@ struct ScreenSharingHandlerAndDelegatesPackage
                     const webrtc::StatsReport::Value *valueRec = (*it_rep)->FindValue(webrtc::StatsReport::kStatsValueNameBytesReceived);
                     if (valueRec) {
                         uint64_t result = 0;
-                        std::stringstream convert(valueRec->value);
-                        if ( !(convert >> result) ) { result = 0; }
+                        result = valueRec->int64_val();
                         
                         [[SMConnectionController sharedInstance].ndController addReceivedBytes:result forServiceName:SMWebRTCServiceNameForStatistics];
                     }
                     const webrtc::StatsReport::Value *valueSent = (*it_rep)->FindValue(webrtc::StatsReport::kStatsValueNameBytesSent);
                     if (valueSent) {
                         uint64_t result = 0;
-                        std::stringstream convert(valueSent->value);
-                        if ( !(convert >> result) ) { result = 0; }
+                        result = valueSent->int64_val();
                         
                         [[SMConnectionController sharedInstance].ndController addSentBytes:result forServiceName:SMWebRTCServiceNameForStatistics];
                     }
@@ -1907,16 +1905,14 @@ struct ScreenSharingHandlerAndDelegatesPackage
                     const webrtc::StatsReport::Value *valueRec = (*it_rep)->FindValue(webrtc::StatsReport::kStatsValueNameBytesReceived);
                     if (valueRec) {
                         uint64_t result = 0;
-                        std::stringstream convert(valueRec->value);
-                        if ( !(convert >> result) ) { result = 0; }
+                        result = valueRec->int64_val();
                         
                         [[SMConnectionController sharedInstance].ndController addReceivedBytes:result forServiceName:SMWebRTCServiceNameForStatistics];
                     }
                     const webrtc::StatsReport::Value *valueSent = (*it_rep)->FindValue(webrtc::StatsReport::kStatsValueNameBytesSent);
                     if (valueSent) {
                         uint64_t result = 0;
-                        std::stringstream convert(valueSent->value);
-                        if ( !(convert >> result) ) { result = 0; }
+                        result = valueSent->int64_val();
                         
                         [[SMConnectionController sharedInstance].ndController addSentBytes:result forServiceName:SMWebRTCServiceNameForStatistics];
                     }

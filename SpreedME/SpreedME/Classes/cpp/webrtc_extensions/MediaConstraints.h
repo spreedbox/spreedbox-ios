@@ -28,9 +28,9 @@
 #include <deque>
 #include <map>
 
-#include <talk/app/webrtc/mediaconstraintsinterface.h>
-#include <talk/app/webrtc/mediastreaminterface.h>
-#include <webrtc/base/stringencode.h>
+#include <api/mediaconstraintsinterface.h>
+#include <api/mediastreaminterface.h>
+#include <rtc_base/stringencode.h>
 
 namespace spreedme {
 

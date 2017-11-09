@@ -97,7 +97,7 @@ public:
 	
 	virtual void EstablishConnection(const std::string &token, const std::string &userId);
 	
-	virtual void SetDelegate(ScreenSharingHandlerDelegateInterface *uiDelegate) { critSect_->Enter(); delegate_ = uiDelegate; critSect_->Leave(); };
+	virtual void SetDelegate(ScreenSharingHandlerDelegateInterface *uiDelegate) { critSect_->AcquireLockExclusive(); delegate_ = uiDelegate; critSect_->ReleaseLockExclusive(); };
 	
 	virtual void Stop();
 	virtual void Dispose();

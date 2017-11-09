@@ -29,8 +29,8 @@
 
 #include "SignallingHandlerInterface.h"
 
-#include <webrtc/base/json.h>
-#include <talk/app/webrtc/datachannelinterface.h>
+#include <rtc_base/json.h>
+#include <api/datachannelinterface.h>
 
 #include "WebrtcCommonDefinitions.h"
 

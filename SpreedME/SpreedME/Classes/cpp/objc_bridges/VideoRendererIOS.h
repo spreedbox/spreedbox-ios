@@ -51,7 +51,7 @@ namespace spreedme {
 			}
 		};
 		
-		virtual void RenderFrame(const cricket::VideoFrame* frame);
+        virtual void RenderFrame(const webrtc::VideoFrame* frame);
 		
 		virtual void Shutdown();
 	};

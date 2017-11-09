@@ -75,12 +75,12 @@ NSString * const kSMShouldNotNotifyAboutAvailableUpdateKey         = @"ShouldNot
 
 
 @interface SMSettingsNetOperation : NSObject <STNetworkOperation>
-@property (nonatomic, strong) NSURLSession *afOperation;
+@property (nonatomic, strong) NSURLSessionTask *afOperation;
 - (void)cancel;
 @end
 
 @implementation SMSettingsNetOperation
-- (void)cancel { [self.afOperation invalidateAndCancel]; }
+- (void)cancel { [self.afOperation cancel]; }
 @end
 
 

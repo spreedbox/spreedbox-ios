@@ -310,7 +310,7 @@ void ScreenSharingHandler::ReceivedDataChannelData(webrtc::DataBuffer *buffer,
 												   PeerConnectionWrapper *wrapper)
 {
 	if (!buffer->binary) {
-		std::string strMsg = std::string(buffer->data.data(), buffer->data.length());
+		std::string strMsg = std::string((const char*)buffer->data.data(), buffer->data.size());
 		Json::Reader jsonReader;
 		Json::Value root;
 		Json::Value message;

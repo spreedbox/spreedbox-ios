@@ -98,7 +98,7 @@ protected:
 	
 	
 	// Instance variables ----------------------------------------------------------------------
-	webrtc::CriticalSectionWrapper *critSect_;
+	webrtc::RWLockWrapper *critSect_;
 	
 	PeerConnectionWrapperFactory *peerConnectionWrapperFactory_; // We do not own it!
 	SignallingHandler *signallingHandler_; // We do not own it!

@@ -25,7 +25,7 @@
 
 #include "MessageQueueInterface.h"
 
-#include <webrtc/base/thread.h>
+#include <rtc_base/thread.h>
 
 namespace spreedme {
 
@@ -37,27 +37,27 @@ public:
 	virtual ~TalkBaseThreadWrapper() {};
 	
 	
-	virtual void Post(rtc::MessageHandler *phandler, uint32 id, rtc::MessageData *pdata = NULL)
+	virtual void Post(rtc::MessageHandler *phandler, uint32_t id, rtc::MessageData *pdata = NULL)
 	{
-		thread_->Post(phandler, id, pdata);
+		thread_->Post(RTC_FROM_HERE, phandler, id, pdata);
 	};
 	
-	virtual void Send(rtc::MessageHandler *phandler, uint32 id, rtc::MessageData *pdata = NULL)
+	virtual void Send(rtc::MessageHandler *phandler, uint32_t id, rtc::MessageData *pdata = NULL)
 	{
-		thread_->Send(phandler, id, pdata);
+		thread_->Send(RTC_FROM_HERE, phandler, id, pdata);
 	};
 	
 	virtual void PostDelayed(int cmsDelay, // milliseconds
 							 rtc::MessageHandler *phandler,
-							 uint32 id,
+							 uint32_t id,
 							 rtc::MessageData *pdata = NULL)
 	{
-		thread_->PostDelayed(cmsDelay, phandler, id, pdata);
+		thread_->PostDelayed(RTC_FROM_HERE, cmsDelay, phandler, id, pdata);
 	};
 	
 	
 	virtual void Clear(rtc::MessageHandler *phandler,
-					   uint32 id = rtc::MQID_ANY,
+					   uint32_t id = rtc::MQID_ANY,
 					   rtc::MessageList* removed = NULL)
 	{
 		thread_->Clear(phandler, id, removed);

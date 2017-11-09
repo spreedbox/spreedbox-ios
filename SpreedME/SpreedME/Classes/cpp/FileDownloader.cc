@@ -76,7 +76,7 @@ FileDownloader::~FileDownloader()
 
 void FileDownloader::DownloadFileForToken(const FileInfo &fileInfo, const std::string &fileLocation, const std::set<std::string> &userIds, const std::string &tempFilePath)
 {
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	
 	userIds_ = userIds;
 		
@@ -98,7 +98,7 @@ void FileDownloader::DownloadFileForToken(const FileInfo &fileInfo, const std::s
 	 */
 	fileInfo_.chunkSize = 0;
 	
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 	
 	this->StartFileDownload();
 }
@@ -106,11 +106,11 @@ void FileDownloader::DownloadFileForToken(const FileInfo &fileInfo, const std::s
 
 void FileDownloader::UpdateUserIds(std::set<std::string> userIds)
 {
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	for (std::set<std::string>::iterator it = userIds.begin(); it != userIds.end(); ++it) {
 		userIds_.insert(*it);
 	}
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 }
 
 
@@ -142,11 +142,11 @@ void FileDownloader::StartFileDownload_s(int maxSimultaneousPeers, int maxSimult
 {
 	fileHandle_.open(tmpFilePath_.c_str(), std::ios::out | std::ios::binary);
 	
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	
 	downloadFileInfo_ = new DownloadFileInfo(fileInfo_);
 	
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 	
 	spreed_me_log("Starting file download with parameters: \n name: %s \n type: %s \n size: %llu \n chunks: %u",
 				  fileInfo_.fileName.c_str(), fileInfo_.fileType.c_str(), fileInfo_.fileSize, fileInfo_.chunks);
@@ -231,13 +231,13 @@ void FileDownloader::OnMessage(rtc::Message* msg)
 		
 		case MSG_FD_UPDATE_DOWNLOAD_PROGRESS_c: {
 			if (delegate_) {
-				critSect_->Enter();
+				critSect_->AcquireLockExclusive();
 #warning CHECK if here type conversion happens correctly
 				FileInfo tempInfo = this->fileInfo();
 				bool lastChunkDownloaded = downloadFileInfo_->ChunkStatus(tempInfo.chunks - 1) == kChunkDownloaded;
-				uint64 downloadProgress = 0;
+				uint64_t downloadProgress = 0;
 				if (lastChunkDownloaded) {
-					uint32 lastChunkSize = tempInfo.fileSize % tempInfo.chunks;
+					uint32_t lastChunkSize = tempInfo.fileSize % tempInfo.chunks;
 					if (lastChunkSize == 0) {
 						lastChunkSize = tempInfo.chunkSize;
 					}
@@ -245,7 +245,7 @@ void FileDownloader::OnMessage(rtc::Message* msg)
 				} else {
 					downloadProgress = downloadFileInfo_->downloadedChunksCount() * tempInfo.chunkSize;
 				}
-				critSect_->Leave();
+				critSect_->ReleaseLockExclusive();
 				
 				delegate_->DownloadProgressHasChanged(this, downloadProgress);
 			}
@@ -334,7 +334,7 @@ void FileDownloader::RequestNextChunk_s()
 			
 			if (downloadFileInfo_->HasChunksToDownload()) {
 				if (firstChunkDownloaded_) {
-					uint32 nextChunkNumber = downloadFileInfo_->GetNextChunkNumberToDownload();
+					uint32_t nextChunkNumber = downloadFileInfo_->GetNextChunkNumberToDownload();
 					if (nextChunkNumber != UINT32_MAX) {
 						this->RequestChunkNumber(nextChunkNumber, wrapper, kDefaultDataChannelLabel);
 					}
@@ -505,12 +505,12 @@ void FileDownloader::CandidateIsReadyToBeSent(IceCandidateStringRepresentation* 
 
 void FileDownloader::DataChannelStateChanged(webrtc::DataChannelInterface::DataState state, webrtc::DataChannelInterface *data_channel, PeerConnectionWrapper *wrapper)
 {
-	critSect_->Enter();
+	critSect_->AcquireLockExclusive();
 	if (/*!isDownloadStarted_ &&*/ state == webrtc::DataChannelInterface::kOpen) {
 		isDownloadStarted_ = true;
 		this->RequestNextChunk();
 	}
-	critSect_->Leave();
+	critSect_->ReleaseLockExclusive();
 	spreed_me_log("Received data channel in FileDownloader!");
 }
 
@@ -523,9 +523,9 @@ void FileDownloader::ReceivedDataChannelData(webrtc::DataBuffer *buffer,
 		
 		char *buf = (char *)buffer->data.data();
 //		spreed_me_log("Buffer data length = %u", buffer.data.length());
-		uint32 size = buffer->data.length();
+		uint32_t size = buffer->data.size();
 		
-		uint8 version = (uint8)buf[0];
+		uint8_t version = (uint8_t)buf[0];
 		if (version != 0) {
 			spreed_me_log("File tranfer protocol version is not 0 but %d", version);
 		}
@@ -533,19 +533,19 @@ void FileDownloader::ReceivedDataChannelData(webrtc::DataBuffer *buffer,
 		
 		//TODO: This conversion works only for little endian.
 		// We need to cast buf to unsigned char because otherwise compiler will fill empty bytes with '1' instead of '0'.
-		uint32 chunkSequenceNumber = 0;
-		chunkSequenceNumber = chunkSequenceNumber | ((uint8)buf[4]) << 0 | ((uint8)buf[5]) << 8 | ((uint8)buf[6]) << 16 | ((uint8)buf[7]) << 24;
-		uint32 crc32 = 0;
-		crc32 = crc32 | ((uint8)buf[8]) << 0 | ((uint8)buf[9]) << 8 | ((uint8)buf[10]) << 16 | ((uint8)buf[11]) << 24;
+		uint32_t chunkSequenceNumber = 0;
+		chunkSequenceNumber = chunkSequenceNumber | ((uint8_t)buf[4]) << 0 | ((uint8_t)buf[5]) << 8 | ((uint8_t)buf[6]) << 16 | ((uint8_t)buf[7]) << 24;
+		uint32_t crc32 = 0;
+		crc32 = crc32 | ((uint8_t)buf[8]) << 0 | ((uint8_t)buf[9]) << 8 | ((uint8_t)buf[10]) << 16 | ((uint8_t)buf[11]) << 24;
 		
 		
 		// Get rid of the first 12 service bytes. And work with raw data only.
 		buf = &buf[12];
 		size = size - 12;
 		
-		uint32 threadSafeChunkSize = 0;
+		uint32_t threadSafeChunkSize = 0;
 		
-		critSect_->Enter();
+		critSect_->AcquireLockExclusive();
 		
 		if (fileInfo_.chunkSize == 0) {
 			fileInfo_.chunkSize = size;
@@ -554,7 +554,7 @@ void FileDownloader::ReceivedDataChannelData(webrtc::DataBuffer *buffer,
 		
 		threadSafeChunkSize = fileInfo_.chunkSize;
 		
-		critSect_->Leave();
+		critSect_->ReleaseLockExclusive();
 		
 		if (size > threadSafeChunkSize) {
 			spreed_me_log("Buffer size is bigger than expected. Expected chunksize = %lu received size = %lu. This is error.", fileInfo_.chunkSize, size);
@@ -562,7 +562,7 @@ void FileDownloader::ReceivedDataChannelData(webrtc::DataBuffer *buffer,
 			return;
 		}
 		
-		uint32 calcCrc32 = crc32buf(buf, size);
+		uint32_t calcCrc32 = crc32buf(buf, size);
 		
 		if (calcCrc32 == crc32) {
 			if (fileHandle_.is_open()) {
@@ -571,14 +571,14 @@ void FileDownloader::ReceivedDataChannelData(webrtc::DataBuffer *buffer,
 				fileHandle_.write(buf, size);
 				
 				//TODO: Check if there is no race conditions here in chunk status setting
-				critSect_->Enter();
+				critSect_->AcquireLockExclusive();
 				downloadFileInfo_->SetChunkStatus(chunkSequenceNumber, kChunkDownloaded);
 				if (chunkSequenceNumber == 0) {
 					firstChunkDownloaded_ = true;
 					downloadingFirstChunk_ = false;
 				}
 				downloadFileInfo_->SetDownloadStatusPair(UniqueDownloadDataChannelId(wrapper->factoryId(),data_channel->label()), DownloadStatusPair());
-				critSect_->Leave();
+				critSect_->ReleaseLockExclusive();
 				
 				spreed_me_log("Writing chunk number %d chunk size %u buffer size %u and requesting next chunk.", chunkSequenceNumber, fileInfo_.chunkSize, size);
 				this->UpdateDownloadProgress();

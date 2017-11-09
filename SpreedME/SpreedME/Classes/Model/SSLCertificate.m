@@ -23,23 +23,23 @@
 #import "SSLCertificate.h"
 
 
-#include "cert.h"
+/*#include "cert.h"
 #include "nss.h"
 #include "utilrename.h"
 #include "keyhi.h"
 #include "hasht.h"
 #include "sechash.h"
-#include "prtime.h"
+#include "prtime.h"*/
 
 
-CERTCertificate* CreateNSSCertHandleFromBytes(const char* data, int length);
-CERTCertificate* CreateNSSCertHandleFromOSHandle(SecCertificateRef cert_handle);
+//CERTCertificate* CreateNSSCertHandleFromBytes(const char* data, int length);
+//CERTCertificate* CreateNSSCertHandleFromOSHandle(SecCertificateRef cert_handle);
 NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 
 
 @interface SSLCertificate ()
 {
-	CERTCertificate *_nssCertificate;
+	//CERTCertificate *_nssCertificate;
 }
 
 
@@ -56,7 +56,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 	self = [super init];
 	if (self) {
 		if (nativeCertificate) {
-			_nssCertificate = CreateNSSCertHandleFromOSHandle(nativeCertificate);
+			/*_nssCertificate = CreateNSSCertHandleFromOSHandle(nativeCertificate);
 			
 			if (!_nssCertificate){
 				self = nil;
@@ -66,7 +66,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 			if (![self calculateFingerprints]) {
 				self = nil;
 				return self;
-			}
+			}*/
 		}
 	}
 	
@@ -79,7 +79,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 	self = [super init];
 	if (self) {
 		if (derData.length) {
-			_nssCertificate = CreateNSSCertHandleFromBytes(derData.bytes, derData.length);
+			/*_nssCertificate = CreateNSSCertHandleFromBytes(derData.bytes, derData.length);
 			
 			if (!_nssCertificate){
 				self = nil;
@@ -89,7 +89,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 			if (![self calculateFingerprints]) {
 				self = nil;
 				return self;
-			}
+			}*/
 		}
 	}
 	
@@ -126,9 +126,9 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 
 - (void)dealloc
 {
-	if (_nssCertificate) {
-		CERT_DestroyCertificate(_nssCertificate);
-	}
+	//if (_nssCertificate) {
+		//CERT_DestroyCertificate(_nssCertificate);
+	//}
 }
 
 
@@ -136,7 +136,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 
 - (NSString *)issuerRawString
 {
-	return NSStr(_nssCertificate->issuerName);
+	return NSStr(""/*_nssCertificate->issuerName*/);
 }
 
 - (NSString *)issuer; //returned value depends on fields in certificate, can be CN or O or OU
@@ -170,9 +170,9 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 
 - (NSString *)issuerCommonName
 {
-	char *issuerLastCN = CERT_GetCommonName(&_nssCertificate->issuer);
-	NSString *issuerCommonName = NSStr(issuerLastCN);
-	PORT_Free(issuerLastCN);
+	//char *issuerLastCN = CERT_GetCommonName(&_nssCertificate->issuer);
+	NSString *issuerCommonName = NSStr(""/*issuerLastCN*/);
+	//PORT_Free(issuerLastCN);
 	
 	return issuerCommonName;
 }
@@ -180,9 +180,9 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 
 - (NSString *)subjectCommonName
 {
-	char *subjectLastCN = CERT_GetCommonName(&_nssCertificate->subject);
-	NSString *subjectCommonName = NSStr(subjectLastCN);
-	PORT_Free(subjectLastCN);
+	//char *subjectLastCN = CERT_GetCommonName(&_nssCertificate->subject);
+	NSString *subjectCommonName = NSStr(""/*subjectLastCN*/);
+	//PORT_Free(subjectLastCN);
 	
 	return subjectCommonName;
 }
@@ -190,13 +190,13 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 
 - (NSString *)email
 {
-	return NSStr(_nssCertificate->emailAddr);
+	return NSStr(""/*_nssCertificate->emailAddr);
 }
 
 
 - (NSString *)rawSubjectString
 {
-	return NSStr(_nssCertificate->subjectName);
+	return NSStr(_nssCertificate->subjectName*/);
 }
 
 
@@ -230,9 +230,9 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 {
 	uint32_t version = 0;
 	
-	if (_nssCertificate->version.len == 1) {
+	/*if (_nssCertificate->version.len == 1) {
 		version = (uint32_t)*_nssCertificate->version.data;
-	}
+	}*/
 	
 	return version;
 }
@@ -242,9 +242,9 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 {
 	NSData *pubKey = nil;
 	
-	SECKEYPublicKey *publicKey = CERT_ExtractPublicKey(_nssCertificate);
+	//SECKEYPublicKey *publicKey = CERT_ExtractPublicKey(_nssCertificate);
 
-	if (publicKey) {
+	/*if (publicKey) {
 		switch (publicKey->keyType) {
 			case nullKey:
 				
@@ -279,7 +279,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 		
 		SECKEY_DestroyPublicKey(publicKey);
 		//	PORT_Free(publicKey);
-	}
+	}*/
 	
 	return pubKey;
 }
@@ -287,7 +287,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 
 - (NSData *)spkiSHA256Fingerprint
 {
-	SECItem *spki =	SECKEY_EncodeDERSubjectPublicKeyInfo(CERT_ExtractPublicKey(_nssCertificate));
+	/*SECItem *spki =	SECKEY_EncodeDERSubjectPublicKeyInfo(CERT_ExtractPublicKey(_nssCertificate));
 	
 	const SECHashObject *ho;
 	
@@ -310,7 +310,8 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 	
 	NSData *data = [NSData dataWithBytes:hash_val length:hash_len];
 
-	return data;
+	return data;*/
+    return nil;
 }
 
 
@@ -318,7 +319,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 {
 	NSString *pubKeyString = nil;
 	
-	SECKEYPublicKey *publicKey = CERT_ExtractPublicKey(_nssCertificate);
+	/*SECKEYPublicKey *publicKey = CERT_ExtractPublicKey(_nssCertificate);
 	
 	if (publicKey) {
 		switch (publicKey->keyType) {
@@ -359,7 +360,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 		
 		SECKEY_DestroyPublicKey(publicKey);
 		//	PORT_Free(publicKey);
-	}
+	}*/
 	
 	return pubKeyString;
 }
@@ -369,7 +370,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 {
 	NSString *algo = nil;
 
-	SECKEYPublicKey *publicKey = CERT_ExtractPublicKey(_nssCertificate);
+	/*SECKEYPublicKey *publicKey = CERT_ExtractPublicKey(_nssCertificate);
 	
 	if (publicKey) {
 		switch (publicKey->keyType) {
@@ -406,7 +407,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 		
 		SECKEY_DestroyPublicKey(publicKey);
 		//	PORT_Free(publicKey);
-	}
+	}*/
 
 	return algo;
 }
@@ -416,7 +417,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 {
 	NSData *serialNumber = nil;
 	
-	serialNumber = [[NSData alloc] initWithBytes:_nssCertificate->serialNumber.data length:_nssCertificate->serialNumber.len];
+	//serialNumber = [[NSData alloc] initWithBytes:_nssCertificate->serialNumber.data length:_nssCertificate->serialNumber.len];
 	
 	return serialNumber;
 }
@@ -424,7 +425,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 
 - (NSString *)serialNumberString
 {
-	NSString *serialNumber = getHexStringFromBuffer(_nssCertificate->serialNumber.data, _nssCertificate->serialNumber.len);
+    NSString *serialNumber = @"";//getHexStringFromBuffer(_nssCertificate->serialNumber.data, _nssCertificate->serialNumber.len);
 	
 	return serialNumber;
 }
@@ -434,12 +435,12 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 {
 	NSDate *notValidAfter = nil;
 	
-	PRTime notBefore = 0;
+	/*PRTime notBefore = 0;
 	PRTime notAfter = 0;
 	SECStatus status =  CERT_GetCertTimes(_nssCertificate, &notBefore, &notAfter);
 	if (status == SECSuccess) {
 		notValidAfter = [NSDate dateWithTimeIntervalSince1970:((double)notAfter / 1000000.0)]; // PRTime is in microseconds
-	}
+	}*/
 	return notValidAfter;
 }
 
@@ -448,12 +449,12 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 {
 	NSDate *notValidbefore = nil;
 	
-	PRTime notBefore = 0;
+	/*PRTime notBefore = 0;
 	PRTime notAfter = 0;
 	SECStatus status =  CERT_GetCertTimes(_nssCertificate, &notBefore, &notAfter);
 	if (status == SECSuccess) {
 		notValidbefore = [NSDate dateWithTimeIntervalSince1970:((double)notBefore / 1000000.0)]; // PRTime is in microseconds
-	}
+	}*/
 	return notValidbefore;
 }
 
@@ -462,7 +463,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 
 - (NSData *)toDER
 {
-	NSData *derData = [[NSData alloc] initWithBytes:_nssCertificate->derCert.data length:_nssCertificate->derCert.len];
+    NSData *derData = nil;//[[NSData alloc] initWithBytes:_nssCertificate->derCert.data length:_nssCertificate->derCert.len];
 	
 	return derData;
 }
@@ -491,13 +492,13 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 
 - (BOOL)isValid
 {
-	BOOL isValid = NO;
+	BOOL isValid = YES;
 	
-	SECCertTimeValidity timeValidity = CERT_CheckCertValidTimes(_nssCertificate, PR_Now(), 0);
+	/*SECCertTimeValidity timeValidity = CERT_CheckCertValidTimes(_nssCertificate, PR_Now(), 0);
 	
 	if (timeValidity == secCertTimeValid) {
 		isValid = YES;
-	}
+	}*/
 	
 	return isValid;
 }
@@ -523,7 +524,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 		return NO;
 	}
 	
-	const SECHashObject *ho;
+	/*const SECHashObject *ho;
 	HASH_HashType hash_type;
 	
 	if (algorithm == HashAlgorithm_MD5) {
@@ -565,7 +566,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length);
 	
 	outFingerprint->length = hash_len;
 	memmove(outFingerprint->data, hash_val, hash_len);
-	
+	*/
 	return YES;
 }
 
@@ -604,7 +605,7 @@ NSString* getHexStringFromBuffer(uint8_t *buffer, size_t length)
 
 #pragma mark - Utility Functions for Native -> NSS conversion
 
-CERTCertificate* CreateNSSCertHandleFromOSHandle(SecCertificateRef cert_handle)
+/*CERTCertificate* CreateNSSCertHandleFromOSHandle(SecCertificateRef cert_handle)
 {
 	CFDataRef cert_data = SecCertificateCopyData(cert_handle);
 	CERTCertificate* cert = CreateNSSCertHandleFromBytes((const char*)(CFDataGetBytePtr(cert_data)), CFDataGetLength(cert_data));
@@ -626,4 +627,4 @@ CERTCertificate* CreateNSSCertHandleFromBytes(const char* data, int length)
 	// Parse into a certificate structure.
 	return CERT_NewTempCertificate(CERT_GetDefaultCertDB(), &der_cert, NULL,
 								   PR_FALSE, PR_TRUE);
-}
+}*/

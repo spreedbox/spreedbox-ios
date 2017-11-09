@@ -130,7 +130,7 @@ int spreed_me_log(const char *fmt, ...)
 		
 	int n = vasprintf(&message, fmt, args);
 	
-	if (n != -1 && message != NULL && spreed_me_log_file) {
+	if (n != -1 && message != NULL) {
 		
 		timeval tp;
 		gettimeofday(&tp, 0);
@@ -141,16 +141,17 @@ int spreed_me_log(const char *fmt, ...)
 		const char *appName = [[[NSProcessInfo processInfo] processName] cStringUsingEncoding:NSUTF8StringEncoding];
 		int processId = [[NSProcessInfo processInfo] processIdentifier];
 		
-		fprintf(spreed_me_log_file, "%d-%02d-%02d %02d:%02d:%02d.%03d %s[%d] %s\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, tp.tv_usec/1000, appName, processId, message);
+        NSLog(@"%s", message);
+
+        if (spreed_me_log_file) {
+            fprintf(spreed_me_log_file, "%d-%02d-%02d %02d:%02d:%02d.%03d %s[%d] %s\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, tp.tv_usec/1000, appName, processId, message);
 		
 //		printf("%d-%02d-%02d %02d:%02d:%02d.%03d %s[%d] %s\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec, tp.tv_usec/1000, appName, processId, message);
 		
-#ifdef SPREEDME_LOG_PRINT_TO_CONSOLE
-		NSLog(@"%s", message);
-#endif
 		
-		free(message);
-		fflush(spreed_me_log_file);
+            fflush(spreed_me_log_file);
+        }
+            free(message);
 //		fclose(spreed_me_log_file);
 //		spreed_me_log_file = NULL;
 		

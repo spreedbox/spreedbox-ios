@@ -158,9 +158,14 @@ typedef enum : NSUInteger {
 																				   @"MD5 fingerprint of cert")
 											value:[SSLCertificate stringRepresentationForFingerprint:cert.md5_fingerprint]];
 	
-	[fingerprints addObject:sha1Fingerprint];
-	[fingerprints addObject:md5Fingerprint];
-	
+    if (sha1Fingerprint != nil) {
+        [fingerprints addObject:sha1Fingerprint];
+    }
+    
+    if (md5Fingerprint != nil) {
+        [fingerprints addObject:md5Fingerprint];
+    }
+    
 	[_certFields setObject:fingerprints forKey:SSLCertificateVCFingerprintSection];
 	
 	// Public key section
@@ -183,9 +188,14 @@ typedef enum : NSUInteger {
 																						@"Public key of cert")
 												value:pubKeyString];
 	
-	[publicKey addObject:publicKeyAlgorithm];
-	[publicKey addObject:publicKeyStringPair];
-	
+    if (publicKeyAlgorithm != nil) {
+        [publicKey addObject:publicKeyAlgorithm];
+    }
+    
+    if (publicKeyStringPair != nil) {
+        [publicKey addObject:publicKeyStringPair];
+    }
+    
 	[_certFields setObject:publicKey forKey:SSLCertificateVCPublicKeySection];
 }
 

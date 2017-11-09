@@ -22,7 +22,7 @@
 
 #include "SignallingHandler.h"
 
-#include <webrtc/base/json.h>
+#include <rtc_base/json.h>
 
 #include "PeerConnectionWrapper.h"
 
@@ -332,7 +332,7 @@ void SignallingHandler::ReceivedDataChannelData(webrtc::DataBuffer *buffer,
 												PeerConnectionWrapper *wrapper)
 {
 	if (!buffer->binary) {
-		std::string strMsg = std::string(buffer->data.data(), buffer->data.length());
+		std::string strMsg = std::string((const char*)buffer->data.data(), buffer->data.size());
 		Json::Reader jsonReader;
 		Json::Value root;
 		Json::Value message;

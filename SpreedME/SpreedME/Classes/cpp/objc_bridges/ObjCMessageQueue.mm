@@ -49,7 +49,7 @@ ObjCMessageQueue::~ObjCMessageQueue()
 }
 
 
-void ObjCMessageQueue::Post(rtc::MessageHandler *phandler, uint32 id, rtc::MessageData *pdata)
+void ObjCMessageQueue::Post(rtc::MessageHandler *phandler, uint32_t id, rtc::MessageData *pdata)
 {
 	rtc::Message *msg = new rtc::Message;
 	msg->phandler = phandler;
@@ -64,7 +64,7 @@ void ObjCMessageQueue::Post(rtc::MessageHandler *phandler, uint32 id, rtc::Messa
 	
 void ObjCMessageQueue::PostDelayed(int cmsDelay,
 						 rtc::MessageHandler *phandler,
-						 uint32 id,
+						 uint32_t id,
 						 rtc::MessageData *pdata)
 {
 	rtc::Message *msg = new rtc::Message;
@@ -77,7 +77,7 @@ void ObjCMessageQueue::PostDelayed(int cmsDelay,
 }
 
 
-void ObjCMessageQueue::Send(rtc::MessageHandler *phandler, uint32 id, rtc::MessageData *pdata)
+void ObjCMessageQueue::Send(rtc::MessageHandler *phandler, uint32_t id, rtc::MessageData *pdata)
 {
 	rtc::Message *msg = new rtc::Message;
 	msg->phandler = phandler;

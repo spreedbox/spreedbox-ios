@@ -27,13 +27,14 @@
 #include <stdexcept>
 
 #include <modules/audio_device/audio_device_impl.h>
-#include <modules/video_render/include/video_render.h>
-#include <modules/video_render/video_render_impl.h>
-#include <talk/app/webrtc/videosourceinterface.h>
-#include <webrtc/base/refcount.h>
-#include <webrtc/base/ssladapter.h>
-#include <webrtc/base/thread.h>
-#include <talk/session/media/mediasession.h>
+#include <modules/video_capture/video_capture_factory.h>
+#include "media/engine/webrtcvideocapturerfactory.h"
+#include <common_video/video_render_frames.h>
+#include <media/base/videosourceinterface.h>
+#include <rtc_base/refcount.h>
+#include <rtc_base/ssladapter.h>
+#include <rtc_base/thread.h>
+#include <pc/mediasession.h>
 
 #include "utils.h"
 
@@ -61,7 +62,7 @@ PeerConnectionWrapperFactory::~PeerConnectionWrapperFactory()
 
 
 PeerConnectionWrapperFactory::PeerConnectionWrapperFactory()  :
-	_critSect(*webrtc::CriticalSectionWrapper::CreateCriticalSection()),
+	_critSect(*webrtc::RWLockWrapper::CreateRWLock()),
 	worker_thread_(NULL),
 	signaling_thread_(NULL),
 	audioConstraints_(NULL),
@@ -76,7 +77,7 @@ PeerConnectionWrapperFactory::PeerConnectionWrapperFactory()  :
 	
 	this->InternalInitializeThreads();
 	
-	adm_ = rtc::scoped_refptr<webrtc::AudioDeviceModule>(webrtc::CreateAudioDeviceModule(0, webrtc::AudioDeviceModule::kPlatformDefaultAudio));
+    adm_ = rtc::scoped_refptr<webrtc::AudioDeviceModule>(webrtc::AudioDeviceModule::Create(0, webrtc::AudioDeviceModule::kPlatformDefaultAudio));
 	
 	
 	// _adm should be initialized before initializing PeerConnectionFactory since latter uses _adm in init
@@ -123,13 +124,13 @@ bool PeerConnectionWrapperFactory::InitializePeerConnectionFactory()
         return false;
     }
 	
-	deviceManager_ = rtc::scoped_ptr<cricket::DeviceManagerInterface>(cricket::DeviceManagerFactory::Create());
+	/*deviceManager_ = rtc::scoped_ptr<cricket::DeviceManagerInterface>(cricket::DeviceManagerFactory::Create());
 	bool initialized = deviceManager_->Init();
 	if (!initialized) {
 		spreed_me_log("Couldn't initialize video device manager!");
-	}
+	}*/
 	
-	videoDeviceInfo_ = webrtc::videocapturemodule::VideoCaptureImpl::CreateDeviceInfo(0);
+	videoDeviceInfo_ = webrtc::videocapturemodule::VideoCaptureImpl::CreateDeviceInfo();
 	if (videoDeviceInfo_ == NULL) {
 		spreed_me_log("Couldn't initialize video device info!");
 	}
@@ -192,6 +193,36 @@ PeerConnectionWrapperFactory::CreateSpreedPeerConnection(const std::string &user
     return peerConnectionWrapper;
 }
 
+std::unique_ptr<cricket::VideoCapturer>
+PeerConnectionWrapperFactory::OpenVideoCaptureDevice() {
+    std::vector<std::string> device_names;
+    {
+        std::unique_ptr<webrtc::VideoCaptureModule::DeviceInfo> info(
+                                                                     webrtc::VideoCaptureFactory::CreateDeviceInfo());
+        if (!info) {
+            return nullptr;
+        }
+        int num_devices = info->NumberOfDevices();
+        for (int i = 0; i < num_devices; ++i) {
+            const uint32_t kSize = 256;
+            char name[kSize] = {0};
+            char id[kSize] = {0};
+            if (info->GetDeviceName(i, name, kSize, id, kSize) != -1) {
+                device_names.push_back(name);
+            }
+        }
+    }
+    
+    cricket::WebRtcVideoDeviceCapturerFactory factory;
+    std::unique_ptr<cricket::VideoCapturer> capturer;
+    for (const auto& name : device_names) {
+        capturer = factory.Create(cricket::Device(name, 0));
+        if (capturer) {
+            break;
+        }
+    }
+    return capturer;
+}
 
 rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnectionWrapperFactory::CreateLocalStream(bool withAudio, bool withVideo)
 {
@@ -232,25 +263,15 @@ rtc::scoped_refptr<webrtc::MediaStreamInterface> PeerConnectionWrapperFactory::C
 			assert(false);
 		}
 		videoTrackId = std::string("vt_") + videoTrackId;
-		
-		std::vector<cricket::Device> devices;
-		if (!deviceManager_->GetVideoCaptureDevices(&devices)) {
-			spreed_me_log("GetVideoCaptureDevices failed!");
-		}
-		
-		for (std::vector<cricket::Device>::iterator it = devices.begin(); it != devices.end(); ++it) {
-			cricket::Device device = *it;
-			if (device.id == videoDeviceId_) {
-				if (!videoSource_) {
-					cricket::VideoCapturer* capturer = deviceManager_->CreateVideoCapturer(device);
-					videoSource_ = peer_connection_factory_->CreateVideoSource(capturer, videoConstraints_);
-				}
-				rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track(peer_connection_factory_->CreateVideoTrack(videoTrackId, videoSource_.get()));
-				stream->AddTrack(video_track);
-				break;
-			}
-		}
-	}
+    
+        if (!videoSource_) {
+                //capturer_ = OpenVideoCaptureDevice();
+                videoSource_ = peer_connection_factory_->CreateVideoSource(OpenVideoCaptureDevice(), videoConstraints_);
+            }
+            rtc::scoped_refptr<webrtc::VideoTrackInterface> video_track(peer_connection_factory_->CreateVideoTrack(videoTrackId, videoSource_.get()));
+            stream->AddTrack(video_track);
+        }
+
 	
     return stream;
 }
@@ -281,7 +302,8 @@ void PeerConnectionWrapperFactory::SetAudioVideoConstrains(MediaConstraints *aud
 void PeerConnectionWrapperFactory::DisposeOfVideoSource()
 {
 	if (videoSource_) {
-		videoSource_->GetVideoCapturer()->Stop();
+		//capturer_.get()->Stop();
+        //capturer_ = NULL;
 	}
 	videoSource_ = NULL;
 }
@@ -290,14 +312,14 @@ void PeerConnectionWrapperFactory::DisposeOfVideoSource()
 void PeerConnectionWrapperFactory::StopVideoCapturing()
 {
 	if (videoSource_) {
-		cricket::VideoCapturer *videoCapturer = videoSource_->GetVideoCapturer();
+		/*cricket::VideoCapturer *videoCapturer = capturer_.get();
 		const cricket::VideoFormat *videoFormat = videoCapturer->GetCaptureFormat();
 		if (videoFormat) {
 			currentCaptureFormat_ = *videoFormat;
 		} else {
 			currentCaptureFormat_ = cricket::VideoFormat();
 		}
-		videoSource_->GetVideoCapturer()->Stop();
+		capturer_.get()->Stop();*/
 	}
 }
 
@@ -305,13 +327,13 @@ void PeerConnectionWrapperFactory::StopVideoCapturing()
 void PeerConnectionWrapperFactory::StartVideoCapturing()
 {
 	if (videoSource_) {
-		cricket::VideoCapturer *videoCapturer = videoSource_->GetVideoCapturer();
+		/*cricket::VideoCapturer *videoCapturer = capturer_.get();
 		if (currentCaptureFormat_.width == 0 && currentCaptureFormat_.height == 0 &&
 			currentCaptureFormat_.interval == 0 && currentCaptureFormat_.fourcc == 0) {
 			spreed_me_log("We can't restart video capturer! We have no capturing format");
 		} else {
-			videoCapturer->Restart(currentCaptureFormat_);
-		}
+			videoCapturer->StartCapturing(currentCaptureFormat_);
+		}*/
 	}
 }
 
@@ -319,16 +341,8 @@ void PeerConnectionWrapperFactory::StartVideoCapturing()
 STDStringVector PeerConnectionWrapperFactory::videoDeviceUniqueIDs()
 {
 	STDStringVector videoDeviceUniqueIDs;
-	
-	std::vector<cricket::Device> devices;
-	if (!deviceManager_->GetVideoCaptureDevices(&devices)) {
-		spreed_me_log("GetVideoCaptureDevices failed!");
-	}
-	
-	for (std::vector<cricket::Device>::iterator it = devices.begin(); it != devices.end(); ++it) {
-		videoDeviceUniqueIDs.push_back(it->id);
-	}
-	
+    //videoDeviceUniqueIDs.push_back(capturer_.get()->GetId());
+  
 	return videoDeviceUniqueIDs;
 }
 
@@ -357,17 +371,7 @@ std::string PeerConnectionWrapperFactory::GetLocalizedNameOfVideoDevice(const st
 {
 	std::string deviceName;
 	
-	std::vector<cricket::Device> devices;
-	if (!deviceManager_->GetVideoCaptureDevices(&devices)) {
-		spreed_me_log("GetVideoCaptureDevices failed!");
-	}
-	
-	for (std::vector<cricket::Device>::iterator it = devices.begin(); it != devices.end(); ++it) {
-		if (it->id == videoDeviceUniqueId) {
-			deviceName = it->name;
-			break;
-		}
-	}
+    //deviceName = capturer_.get()->GetId();
 	
 	return deviceName;
 }
@@ -393,5 +397,5 @@ void PeerConnectionWrapperFactory::AudioInterruptionStarted()
 
 void PeerConnectionWrapperFactory::AudioInterruptionStopped()
 {
-	adm_->ResetAudioDevice();
+	//adm_->ResetAudioDevice();
 }

@@ -23,8 +23,8 @@
 #ifndef __SpreedME__MessageQueueInterface__
 #define __SpreedME__MessageQueueInterface__
 
-#include <webrtc/base/messageQueue.h>
-#include <webrtc/base/messageHandler.h>
+#include <rtc_base/messagequeue.h>
+#include <rtc_base/messagehandler.h>
 
 
 namespace spreedme {
@@ -32,15 +32,15 @@ namespace spreedme {
 // This class mimics rtc::Thread interface for 'Post'-ing and 'Send'-ing messages.
 class MessageQueueInterface {
 public:
-	virtual void Post(rtc::MessageHandler *phandler, uint32 id, rtc::MessageData *pdata = NULL) = 0;
-	virtual void Send(rtc::MessageHandler *phandler, uint32 id, rtc::MessageData *pdata = NULL) = 0;
+	virtual void Post(rtc::MessageHandler *phandler, uint32_t id, rtc::MessageData *pdata = NULL) = 0;
+	virtual void Send(rtc::MessageHandler *phandler, uint32_t id, rtc::MessageData *pdata = NULL) = 0;
 	virtual void PostDelayed(int cmsDelay, // milliseconds
 							 rtc::MessageHandler *phandler,
-							 uint32 id,
+							 uint32_t id,
 							 rtc::MessageData *pdata = NULL) = 0;
 	
 	virtual void Clear(rtc::MessageHandler *phandler,
-					   uint32 id = rtc::MQID_ANY,
+					   uint32_t id = rtc::MQID_ANY,
 					   rtc::MessageList* removed = NULL) = 0;
 };
 	

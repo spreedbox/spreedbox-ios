@@ -26,7 +26,7 @@
 #include <set>
 #include <string>
 
-#include <talk/app/webrtc/jsep.h>
+#include <api/jsep.h>
 
 #include "ChannelingConstants.h"
 

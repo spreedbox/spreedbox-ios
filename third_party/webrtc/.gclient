@@ -1,10 +1,10 @@
 solutions = [
-  { "name"        : "src",
-    "url"         : "https://github.com/strukturag/webrtc-ios.git",
-    "managed"     : False,
-    "deps_file"   : "DEPS",
+  {
+    "url": "https://webrtc.googlesource.com/src.git",
+    "managed": False,
+    "name": "src",
+    "deps_file": "DEPS",
+    "custom_deps": {},
   },
 ]
-
 target_os = ["ios", "mac"]
- 

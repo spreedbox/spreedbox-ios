@@ -24,7 +24,7 @@
 
 #include <stdexcept>
 
-#include <webrtc/base/helpers.h>
+#include <rtc_base/helpers.h>
 
 using namespace spreedme;
 
@@ -34,7 +34,7 @@ TokenBasedConnectionsHandler(PeerConnectionWrapperFactory *peerConnectionWrapper
 							 MessageQueueInterface *workerQueue,
 							 MessageQueueInterface *callbacksMessageQueue) :
 
-		critSect_(webrtc::CriticalSectionWrapper::CreateCriticalSection()),
+		critSect_(webrtc::RWLockWrapper::CreateRWLock()),
 		peerConnectionWrapperFactory_(peerConnectionWrapperFactory),
 		signallingHandler_(signallingHandler),
 		workerQueue_(workerQueue),

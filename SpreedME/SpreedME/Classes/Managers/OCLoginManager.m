@@ -81,6 +81,7 @@ typedef void (^GetUserComboCompletionBlock)(NSDictionary *jsonResponse, NSError 
         }
                 
         [_httpRequestOpManager.requestSerializer setAuthorizationHeaderFieldWithUsername:userName password:password];
+
         
         server = [server stringByAppendingFormat:@"/user/token"];
         

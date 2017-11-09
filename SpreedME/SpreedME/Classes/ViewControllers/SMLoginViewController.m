@@ -36,6 +36,7 @@
 #import "UIFont+FontAwesome.h"
 #import "NSString+FontAwesome.h"
 
+#import "Nextcloud-swift.h"
 
 typedef enum : NSUInteger {
     kSMLoginViewControllerLinkTypeCreateAccount,
@@ -180,6 +181,15 @@ typedef enum : NSUInteger {
                                    action:@selector(dismissKeyboard)];
 	[self.view addGestureRecognizer:tap];
 	
+    // PE:
+    NCManageDatabase* dbInstance = [NCManageDatabase sharedInstance];
+    tableAccount* account = [dbInstance getAccountActive];
+    if (account != nil) {
+        _username = [account.user copy];
+        self.passwordTextField.text = [account.password copy];
+        _loginButton.enabled = YES;
+    }
+    
 	self.spreedNameTextField.text = _username;
     
     [self.goToAppStoreButton setCornerRadius:kViewCornerRadius];
@@ -357,7 +367,7 @@ typedef enum : NSUInteger {
 
 - (void)login
 {
-    if ([SMConnectionController sharedInstance].spreedMeMode) {
+    /*if ([SMConnectionController sharedInstance].spreedMeMode) {
         [self presentViewController:_waitingForLoginView animated:YES completion:^{
             [[SMConnectionController sharedInstance] loginWithUsername:self.spreedNameTextField.text password:self.passwordTextField.text];
         }];
@@ -366,12 +376,12 @@ typedef enum : NSUInteger {
             [self presentViewController:_waitingForLoginView animated:YES completion:^{
                 [[SMConnectionController sharedInstance] checkPermissionToUseSpreedMEAppWithUsername:self.spreedNameTextField.text password:self.passwordTextField.text serverEndpoint:[SMConnectionController sharedInstance].currentOwnCloudServer];
             }];
-        } else {
+         else {*/
             [self presentViewController:_waitingForLoginView animated:YES completion:^{
                 [[SMConnectionController sharedInstance] loginOCWithUsername:self.spreedNameTextField.text password:self.passwordTextField.text serverEndpoint:[SMConnectionController sharedInstance].currentOwnCloudRESTAPIEndpoint];
             }];
-        }
-    }
+        /*}
+    }*/
 }
 
 

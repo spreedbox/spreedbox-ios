@@ -22,7 +22,7 @@
 
 #include "FileUploader.h"
 
-#include <webrtc/base/helpers.h>
+#include <rtc_base/helpers.h>
 
 #include "crc32.h"
 
@@ -185,9 +185,9 @@ void FileUploader::AsyncDeleteWrapperForUserIdWrapperId(const std::string &userI
 void FileUploader::DecideOnFileChunksForFileSize()
 {
 	fileInfo_.chunkSize = 60000; // SCTP data packet max size is 64k
-	uint64 reminder = fileInfo_.fileSize % fileInfo_.chunkSize;
-	uint64 chunks = fileInfo_.fileSize / fileInfo_.chunkSize;
-	fileInfo_.chunks = (uint32)chunks + (reminder > 0 ? 1 : 0);
+	uint64_t reminder = fileInfo_.fileSize % fileInfo_.chunkSize;
+	uint64_t chunks = fileInfo_.fileSize / fileInfo_.chunkSize;
+	fileInfo_.chunks = (uint32_t)chunks + (reminder > 0 ? 1 : 0);
 }
 
 
@@ -339,24 +339,24 @@ void FileUploader::ReceivedDataChannelData(webrtc::DataBuffer *buffer,
 		delete buffer;
 	} else {
 		
-		std::string message = std::string(buffer->data.data(), buffer->data.length());
+		std::string message = std::string((const char *)buffer->data.data(), buffer->data.size());
 		
 		Json::Reader reader;
 		Json::Value jsonMsg;
 		bool success = reader.parse(message, jsonMsg);
 		if (success) {
 			std::string requestMode = jsonMsg.get(kDataChannelChunkRequestModeKey, Json::Value()).asString();
-			uint32 chunkNum = jsonMsg.get(kDataChannelChunkSequenceNumberKey, Json::Value()).asUInt();
+			uint32_t chunkNum = jsonMsg.get(kDataChannelChunkSequenceNumberKey, Json::Value()).asUInt();
 			if (requestMode == kDataChannelChunkRequestModeRequestKey && chunkNum < fileInfo_.chunks) {
 				fileHandle_.seekg(chunkNum * fileInfo_.chunkSize);
-				uint32 size = fileInfo_.fileSize - chunkNum * fileInfo_.chunkSize > fileInfo_.chunkSize ? fileInfo_.chunkSize : fileInfo_.fileSize - chunkNum * fileInfo_.chunkSize;
+				uint32_t size = fileInfo_.fileSize - chunkNum * fileInfo_.chunkSize > fileInfo_.chunkSize ? fileInfo_.chunkSize : fileInfo_.fileSize - chunkNum * fileInfo_.chunkSize;
 				
 				char *buff = (char *)malloc(size + 12);
 				fileHandle_.read(buff+12, size);
 				
 				buff[0] = 0; //This is version;
 				
-				uint32 calcCrc32 = crc32buf(buff+12, size);
+				uint32_t calcCrc32 = crc32buf(buff+12, size);
 				memcpy(&buff[8], &calcCrc32, 4); // this is checksum
 				memcpy(&buff[4], &chunkNum, 4); // this is chunk num
 				

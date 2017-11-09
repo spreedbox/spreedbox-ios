@@ -30,7 +30,7 @@
 #include "PeerConnectionWrapperFactory.h"
 #include "SignallingHandler.h"
 #include "TalkBaseThreadWrapper.h"
-#include <webrtc/base/thread.h>
+#include <rtc_base/thread.h>
 
 #import "UsersManager.h"
 #import "SMConnectionController_ObjectiveCPP.h"
@@ -96,7 +96,7 @@ public:
 		return;
 	};
 	
-	virtual void DownloadProgressHasChanged(const std::string &token, uint64 bytesDownloaded, double estimatedFinishTimeInterval)
+	virtual void DownloadProgressHasChanged(const std::string &token, uint64_t bytesDownloaded, double estimatedFinishTimeInterval)
 	{
 		FileSharingManagerObjC *messageReceiver = messageReceiver_;
 		NSString *token_objC = NSStr(token.c_str());
@@ -133,7 +133,7 @@ public:
 			[messageReceiver fileSharingHasStartedForToken:token_objC chatFileInfo:chatFileInfo];
 		});
 	};
-	
+
 private:
 	FileSharingManagerDelegate();
 	
