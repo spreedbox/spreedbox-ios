@@ -60,9 +60,9 @@ VideoRendererIOS::~VideoRendererIOS()
 }
 
 
-void VideoRendererIOS::RenderFrame(const webrtc::VideoFrame* frame)
+void VideoRendererIOS::OnFrame(const webrtc::VideoFrame& frame)
 {
-	RTCI420Frame* i420Frame = [[RTCI420Frame alloc] initWithVideoFrame:frame];
+	RTCI420Frame* i420Frame = [[RTCI420Frame alloc] initWithVideoFrame:&frame];
 	
 	SMRTCVideoRenderView *renderView = (__bridge SMRTCVideoRenderView *)videoView_;
 	

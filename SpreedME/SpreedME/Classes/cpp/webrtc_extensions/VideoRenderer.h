@@ -57,7 +57,6 @@ public:
 		}
 	};
 	
-	virtual void RenderFrame(const webrtc::VideoFrame* frame) = 0;
 	
 	virtual void Shutdown() = 0;
 	
@@ -65,9 +64,6 @@ public:
 	virtual std::string videoTrackId() {return videoTrackId_;};
 	virtual std::string streamLabel() {return streamLabel_;};
 	virtual void *videoView() {return videoView_;};
-        void OnFrame(
-                                             const webrtc::VideoFrame& video_frame) {
-        };
         
     protected:
 	void *videoView_; // subclasses should release/free this object properly!

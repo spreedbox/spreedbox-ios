@@ -51,9 +51,9 @@ namespace spreedme {
 			}
 		};
 		
-        virtual void RenderFrame(const webrtc::VideoFrame* frame);
+        virtual void OnFrame(const webrtc::VideoFrame& frame);
 		
-		virtual void Shutdown();
+        virtual void Shutdown();
 	};
 	
 	
