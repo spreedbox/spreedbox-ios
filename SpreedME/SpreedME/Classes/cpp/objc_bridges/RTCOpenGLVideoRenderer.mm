@@ -367,9 +367,9 @@ static const GLsizei kNumTextures = 3 * kNumTextureSets;
 - (BOOL)updateTextureDataForFrame:(RTCI420Frame*)frame {
   NSUInteger textureOffset = _currentTextureSet * 3;
   NSAssert(textureOffset + 3 <= kNumTextures, @"invalid offset");
-  NSParameterAssert(frame.yPitch == frame.width);
-  NSParameterAssert(frame.uPitch == frame.chromaWidth);
-  NSParameterAssert(frame.vPitch == frame.chromaWidth);
+  //NSParameterAssert(frame.yPitch == frame.width);
+  //NSParameterAssert(frame.uPitch == frame.chromaWidth);
+  //NSParameterAssert(frame.vPitch == frame.chromaWidth);
 
   glActiveTexture(GL_TEXTURE0 + textureOffset);
   // When setting texture sampler uniforms, the texture index is used not

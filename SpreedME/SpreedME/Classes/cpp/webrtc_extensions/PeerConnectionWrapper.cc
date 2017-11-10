@@ -614,7 +614,7 @@ void PeerConnectionWrapper::SetupVideoRenderer(const std::string &streamLabel,
 			return;
 		}
 		
-		//videoTrack->AddRenderer(renderer);
+        videoTrack->AddOrUpdateSink(renderer, rtc::VideoSinkWants());
 		
 		rendererInfo.videoView = renderer->videoView();
 		
@@ -672,7 +672,7 @@ void PeerConnectionWrapper::DeleteVideoRenderer(const std::string &streamLabel, 
 	if (videoTrack) {
 		std::map<std::string, VideoRenderer*>::iterator it = renderersMap_.find(rendererName);
 		if (it != renderersMap_.end()) {
-			//videoTrack->RemoveRenderer(it->second);
+			videoTrack->RemoveSink(it->second);
 			it->second->Shutdown(); // Shutdown renderer since they can have some timers or other stuff to render buffers
 									// which might not be there anymore. In case of VideoRendererIOS it tries to render
 									// Obj-C i420 frame which has shallow copy of frame buffer that is already released. 

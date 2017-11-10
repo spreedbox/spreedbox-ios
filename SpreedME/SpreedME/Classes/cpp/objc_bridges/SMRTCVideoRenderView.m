@@ -28,7 +28,7 @@
 
 #import <GLKit/GLKit.h>
 
-#import "RTCOpenGLVideoRenderer.h"
+#import "RTCEAGLVideoView.h"
 
 
 // RTCDisplayLinkTimer wraps a CADisplayLink and is set to fire every two screen
@@ -108,11 +108,11 @@
 {
 	SMRTCDisplayLinkTimer* _timer;
 	GLKView* _glkView;
-	RTCOpenGLVideoRenderer* _glRenderer;
+	RTCEAGLVideoView* _glRenderer;
 }
 
 @property(nonatomic, readonly) GLKView* glkView;
-@property(nonatomic, readonly) RTCOpenGLVideoRenderer* glRenderer;
+@property(nonatomic, readonly) RTCEAGLVideoView* glRenderer;
 @end
 
 
@@ -122,7 +122,7 @@
 	if (self = [super initWithFrame:frame]) {
 		EAGLContext* glContext =
         [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
-		_glRenderer = [[RTCOpenGLVideoRenderer alloc] initWithContext:glContext];
+		_glRenderer = [[RTCEAGLVideoView alloc] initWithFrame:CGRectZero];
 		
 		// GLKView manages a framebuffer for us.
 		_glkView = [[GLKView alloc] initWithFrame:CGRectZero
@@ -152,14 +152,14 @@
 		// Frames are received on a separate thread, so we poll for current frame
 		// using a refresh rate proportional to screen refresh frequency. This
 		// occurs on the main thread.
-		__weak SMRTCVideoRenderView *weakSelf = self;
+		//__weak SMRTCVideoRenderView *weakSelf = self;
 		_timer = [[SMRTCDisplayLinkTimer alloc] initWithTimerHandler:^{
-			if (weakSelf.glRenderer.lastDrawnFrame == weakSelf.i420Frame) {
-				return;
-			}
+			//if (weakSelf.glRenderer == weakSelf.i420Frame) {
+			//	return;
+			//}
 			// This tells the GLKView that it's dirty, which will then call the
 			// GLKViewDelegate method implemented below.
-			[weakSelf.glkView setNeedsDisplay];
+			//[weakSelf.glkView setNeedsDisplay];
 		}];
 		[self setupGL];
 	}

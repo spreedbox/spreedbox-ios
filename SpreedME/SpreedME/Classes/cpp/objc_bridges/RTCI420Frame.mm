@@ -89,7 +89,8 @@
   if (self = [super init]) {
     // Keep a shallow copy of the video frame. The underlying frame buffer is
     // not copied.
-    //_videoFrame.reset(videoFrame->Copy());
+      webrtc::VideoFrame* copyFrame = new webrtc::VideoFrame(*videoFrame);
+      _videoFrame = std::unique_ptr<webrtc::VideoFrame>(copyFrame);
   }
   return self;
 }
