@@ -85,6 +85,7 @@ typedef enum SMDisconnectionReason {
 @property (nonatomic, copy, readonly) NSString *currentWebSocketEndpoint; // no trailing slash
 @property (nonatomic, copy, readonly) NSString *currentRESTAPIEndpoint; // no trailing slash
 @property (nonatomic, copy, readonly) NSString *currentWellKnownEndpoint; // no trailing slash
+@property (nonatomic, copy, readonly) NSString *currentWebrtcRESTAPIEndpoint; // no trailing slash
 
 // Endpoint for ownCloud REST API
 @property (nonatomic, copy, readonly) NSString *currentOwnCloudRESTAPIEndpoint; // no trailing slash

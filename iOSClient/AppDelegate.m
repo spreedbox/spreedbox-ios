@@ -477,7 +477,7 @@
     OptionsViewController *optionsViewController = [[OptionsViewController alloc] initWithNibName:@"OptionsViewController" bundle:nil];
     RecentChatsViewController *recentChatsViewController = [[RecentChatsViewController alloc] initWithUserActivityController:[UsersActivityController sharedInstance]];
     
-    CCMore *moreController = [[CCMore alloc] initWithNibName:@"More" bundle:nil];
+    CCMore *moreController = [[CCMore alloc] initWithNibName:@"CCMore" bundle:nil];
     
     ChildRotationTabBarController *tabbar = [[ChildRotationTabBarController alloc] init];
     

@@ -215,10 +215,15 @@ PeerConnectionWrapperFactory::OpenVideoCaptureDevice() {
     
     cricket::WebRtcVideoDeviceCapturerFactory factory;
     std::unique_ptr<cricket::VideoCapturer> capturer;
-    for (const auto& name : device_names) {
-        capturer = factory.Create(cricket::Device(name, 0));
-        if (capturer) {
-            break;
+
+    capturer = factory.Create(cricket::Device("Front Camera", 0));
+    
+    if (capturer == NULL) {
+        for (const auto& name : device_names) {
+            capturer = factory.Create(cricket::Device(name, 0));
+            if (capturer) {
+                break;
+            }
         }
     }
     return capturer;

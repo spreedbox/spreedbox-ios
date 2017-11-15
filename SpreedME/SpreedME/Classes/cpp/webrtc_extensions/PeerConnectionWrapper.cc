@@ -1461,13 +1461,16 @@ void PeerConnectionWrapper::RenderFrame(const webrtc::VideoFrame* frame) {
 
 // Triggered when media is received on a new stream from remote peer.
 void PeerConnectionWrapper::OnAddStream(rtc::scoped_refptr<webrtc::MediaStreamInterface> stream) {
+    PointerMessageData<webrtc::MediaStreamInterface> *msgData = new PointerMessageData<webrtc::MediaStreamInterface>(stream);
+    workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_ADD_STREAM, msgData);
     
 }
 
 // Triggered when a remote peer close a stream.
 void PeerConnectionWrapper::OnRemoveStream(
                     rtc::scoped_refptr<webrtc::MediaStreamInterface> stream) {
-    
+    PointerMessageData<webrtc::MediaStreamInterface> *msgData = new PointerMessageData<webrtc::MediaStreamInterface>(stream);
+    workerThread_->Post(RTC_FROM_HERE, this, MSG_PCW_PCO_ON_REMOVE_STREAM, msgData);
 }
 
 // Called any time the IceGatheringState changes.

@@ -50,6 +50,7 @@
 NSString * const kDefaultServer		= @"api.spreed.me:443";
 
 NSString * const kWebSocketEndpoint = @"/webrtc/ws";
+NSString * const kWebrtcRESTEndpoint = @"/webrtc";
 NSString * const kRESTAPIEndpoint = @"/index.php/apps/spreedme/api/v1";
 NSString * const kImagesEndpoint = @"/static/img";
 NSString * const kWellKnownEndpoint = @"/.well-known/spreed-configuration";
@@ -653,11 +654,13 @@ typedef enum : NSInteger {
     NSString *RESTAPIEndpoint = [NSString stringWithFormat:@"%@://%@:%d%@", httpScheme, host, serverPort, [path stringByAppendingPathComponent:kRESTAPIEndpoint]];
     NSString *imagesEndpoint =  [NSString stringWithFormat:@"%@://%@:%d%@", httpScheme, host, serverPort, [path stringByAppendingPathComponent:kImagesEndpoint]];
     NSString *wellKnownEndpoint =  [NSString stringWithFormat:@"%@://%@:%d%@", httpScheme, host, serverPort, kWellKnownEndpoint];
+    NSString *webrtcRESTEndpoint = [NSString stringWithFormat:@"%@://%@:%d%@", httpScheme, host, serverPort, kWebrtcRESTEndpoint];
     
     [endpoints addObject:webSocketEndpoint];
     [endpoints addObject:RESTAPIEndpoint];
     [endpoints addObject:imagesEndpoint];
     [endpoints addObject:wellKnownEndpoint];
+    [endpoints addObject:webrtcRESTEndpoint];
     
     return [NSArray arrayWithArray:endpoints];
 }
@@ -673,6 +676,7 @@ typedef enum : NSInteger {
 	_currentRESTAPIEndpoint = endpoints[1];
 	_currentImagesEndpoint =  endpoints[2];
     _currentWellKnownEndpoint =  endpoints[3];
+    _currentWebrtcRESTAPIEndpoint = endpoints[4];
 }
 
 
@@ -691,6 +695,7 @@ typedef enum : NSInteger {
     _currentWebSocketEndpoint = spreedMeEndpoints[0];
     _currentRESTAPIEndpoint = spreedMeEndpoints[1];
     _currentImagesEndpoint =  spreedMeEndpoints[2];
+    _currentWebrtcRESTAPIEndpoint = spreedMeEndpoints[4];
     
     [[SettingsController sharedInstance] discoverServicesFromServer:_currentWellKnownEndpoint withCompletionBlock:^(NSError *error) {
         if (!error) {
@@ -1588,6 +1593,7 @@ typedef enum : NSInteger {
 		_currentImagesEndpoint = nil;
 		_currentRESTAPIEndpoint = nil;
 		_currentWebSocketEndpoint = nil;
+        _currentWebrtcRESTAPIEndpoint = nil;
 	}
 	[UsersManager defaultManager].currentUser.wasConnected = NO; // user shouldn't connect automatically after reset
 	

@@ -102,17 +102,21 @@
 	if (_httpRequestOpManager) {
         
         _httpRequestOpManager.securityPolicy = [SettingsController sharedInstance].spreedMeMode ? [SpreedMeStrictSSLSecurityPolicy defaultPolicy] : [SpreedSSLSecurityPolicy defaultPolicy];
-		
-		NSDictionary *json = @{@"id" : sessionId,
+        _httpRequestOpManager.responseSerializer = [AFJSONResponseSerializer serializerWithReadingOptions:NSJSONReadingAllowFragments];
+		//_httpRequestOpManager.responseSerializer.acceptableContentTypes = [NSSet setWithObject:@"text/plain"];
+        
+        NSDictionary *json = @{@"id" : sessionId,
 						   @"sid" : secureSessionId,
 						   @"useridcombo" : userIdCombo,
 						   @"secret": secret};
 		
-		NSString *server = [[SMConnectionController sharedInstance].currentRESTAPIEndpoint copy];
-		server = [server stringByAppendingFormat:@"/sessions/%@/", sessionId];
+		NSString *server = [[SMConnectionController sharedInstance].currentWebrtcRESTAPIEndpoint copy];
+		server = [server stringByAppendingFormat:@"/api/v1/sessions/%@/", sessionId];
 		
 		GetNonceCompletionBlock copiedBlock = [block copy];
 		
+        //return [self patchRequest:server parameters:json completionBlock:copiedBlock];
+        
 		NSURLSessionDataTask *operation = [_httpRequestOpManager PATCH:server parameters:json success:^(NSURLSessionTask *operation, id responseObject) {
 			if (copiedBlock) {
 				copiedBlock(responseObject, nil);
@@ -142,5 +146,28 @@
 	return nil;
 }
 
+-(LoginManagerOperation *)patchRequest:(NSString *)urlStr parameters:(NSDictionary *)parametersDictionary
+                       completionBlock:(GetNonceCompletionBlock)block {
+    NSURL *URL = [NSURL URLWithString:urlStr];
+    
+    AFHTTPSessionManager *manager = [AFHTTPSessionManager manager];
+    manager.responseSerializer = [AFHTTPResponseSerializer serializer];
+    NSURLSessionDataTask *operation = [manager PATCH:URL.absoluteString parameters:parametersDictionary success:^(NSURLSessionDataTask *task, id responseObject) {
+        NSError* error;
+        NSDictionary* json = [NSJSONSerialization JSONObjectWithData:responseObject
+                                                             options:kNilOptions
+                                                               error:&error];
+        
+        block(responseObject, nil);
+    } failure:^(NSURLSessionDataTask *task, NSError *error) {
+        NSLog(@"Error: %@", error);
+        block(nil, error);
+    }];
+    
+    LoginManagerOperation *loginOperation = [[LoginManagerOperation alloc] init];
+    loginOperation.requestOperation = operation;
+    return loginOperation;
+    
+}
 
 @end

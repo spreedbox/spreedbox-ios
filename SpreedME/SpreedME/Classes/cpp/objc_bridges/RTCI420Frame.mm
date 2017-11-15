@@ -42,39 +42,39 @@
 }
 
 - (NSUInteger)chromaWidth {
-  return _videoFrame.get()->width();
+  return _videoFrame->video_frame_buffer()->GetI420()->ChromaWidth();
 }
 
 - (NSUInteger)chromaHeight {
-  return _videoFrame.get()->height();
+  return _videoFrame->video_frame_buffer()->GetI420()->ChromaHeight();
 }
 
 - (NSUInteger)chromaSize {
-  return _videoFrame->size();
+  return _videoFrame->video_frame_buffer()->GetI420()->ChromaWidth() * _videoFrame->video_frame_buffer()->GetI420()->ChromaHeight();
 }
 
 - (const uint8_t*)yPlane {
-  return 0;
+    return _videoFrame->video_frame_buffer()->GetI420()->DataY();
 }
 
 - (const uint8_t*)uPlane {
-  return 0;
+  return _videoFrame->video_frame_buffer()->GetI420()->DataU();
 }
 
 - (const uint8_t*)vPlane {
-  return 0;
+  return _videoFrame->video_frame_buffer()->GetI420()->DataV();
 }
 
 - (NSInteger)yPitch {
-  return 0;
+    return _videoFrame->video_frame_buffer()->GetI420()->StrideY();
 }
 
 - (NSInteger)uPitch {
-  return 0;
+  return _videoFrame->video_frame_buffer()->GetI420()->StrideU();;
 }
 
 - (NSInteger)vPitch {
-  return 0;
+  return _videoFrame->video_frame_buffer()->GetI420()->StrideU();;
 }
 
 - (BOOL)makeExclusive {
